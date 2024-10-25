@@ -107,9 +107,9 @@ class _VideoPlayerMobileControlsState extends State<VideoPlayerMobileControls> {
                       _c.subtitleBackgroundOpacity.value,
                     ),
                   );
-                  _subtitleViewKey.currentState?.textAlign =
-                      _c.subtitleTextAlign.value;
-                  _subtitleViewKey.currentState?.style = textStyle;
+                  // _subtitleViewKey.currentState?.textAlign =
+                  //     _c.subtitleTextAlign.value;
+                  // _subtitleViewKey.currentState?.style = textStyle;
                   _subtitleViewKey.currentState?.padding = EdgeInsets.fromLTRB(
                     16.0,
                     0.0,
