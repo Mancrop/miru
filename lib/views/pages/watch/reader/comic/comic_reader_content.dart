@@ -70,7 +70,7 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
   _buildContent() {
     late Color backgroundColor;
     if (Platform.isAndroid) {
-      backgroundColor = Theme.of(context).colorScheme.background;
+      backgroundColor = Theme.of(context).colorScheme.surface;
     } else {
       backgroundColor = fluent.FluentTheme.of(context).micaBackgroundColor;
     }
