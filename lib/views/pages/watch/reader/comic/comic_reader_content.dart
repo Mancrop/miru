@@ -74,10 +74,10 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
     } else {
       backgroundColor = fluent.FluentTheme.of(context).micaBackgroundColor;
     }
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: FocusNode(),
       autofocus: true,
-      onKey: _c.onKey,
+      onKeyEvent:(value) => _c.onKey(value),
       child: Container(
         color: backgroundColor,
         width: double.infinity,
