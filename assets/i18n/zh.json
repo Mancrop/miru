@@ -33,7 +33,8 @@
     "export": "导出",
     "off": "关闭",
     "error-message": "错误信息",
-    "disconnect": "断开连接"
+    "disconnect": "断开连接",
+    "download": "下载"
   },
   "home": {
     "continue-watching": "继续观看",

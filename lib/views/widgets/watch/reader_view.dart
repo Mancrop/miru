@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/utils/layout.dart';
+import 'package:miru_app/views/widgets/button.dart';
 import 'package:miru_app/views/widgets/watch/control_panel_footer.dart';
 import 'package:miru_app/views/widgets/watch/control_panel_header.dart';
 import 'package:miru_app/controllers/watch/reader_controller.dart';
@@ -66,11 +70,24 @@ class ReaderView<T extends ReaderController> extends StatelessWidget {
                 buildSettings: buildSettings,
               ),
             ),
+            // 中间控制
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: PlatformFilledButton(
+                  child: Text('common.download'.i18n),
+                  onPressed: () {
+                    c.download();
+                  },
+                ),
+              ),
+            ),
             // 底部控制
             Positioned(
               right: 0,
               left: 0,
-              bottom: 0,
+              bottom: 25,
               child: ControlPanelFooter<T>(tag),
             ),
           ]

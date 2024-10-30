@@ -6,6 +6,7 @@ import 'package:miru_app/models/history.dart';
 import 'package:miru_app/controllers/home_controller.dart';
 import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/data/services/extension_service.dart';
+import 'package:miru_app/utils/log.dart';
 
 class ReaderController<T> extends GetxController {
   final String title;
@@ -31,6 +32,7 @@ class ReaderController<T> extends GetxController {
   late Rx<T?> watchData = Rx(null);
   final error = ''.obs;
   final isShowControlPanel = false.obs;
+  final downloadSet = false.obs;
   late final index = playIndex.obs;
   get cuurentPlayUrl => playList[index.value].url;
   Timer? _timer;
@@ -55,6 +57,11 @@ class ReaderController<T> extends GetxController {
   void previousPage() {}
 
   void nextPage() {}
+
+  void download() { 
+    logger.info('Download Button Pressed');
+    downloadSet.value = false; 
+  }
 
   showControlPanel() {
     isShowControlPanel.value = true;

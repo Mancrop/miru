@@ -108,7 +108,7 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
               final viewPadding = maxWidth > 800 ? ((maxWidth - 800) / 2) : 0.0;
               final images = _c.watchData.value!.urls;
               final readerType = _c.readType.value;
-              final cuurentPage = _c.currentPage.value;
+              final currentPage = _c.currentPage.value;
 
               if (readerType == MangaReadMode.webTonn) {
                 final width = MediaQuery.of(context).size.width;
@@ -138,7 +138,7 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
                         padding: EdgeInsets.symmetric(
                           horizontal: viewPadding,
                         ),
-                        initialScrollIndex: cuurentPage,
+                        initialScrollIndex: currentPage,
                         itemScrollController: _c.itemScrollController,
                         itemPositionsListener: _c.itemPositionsListener,
                         scrollOffsetController: _c.scrollOffsetController,

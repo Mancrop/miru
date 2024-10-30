@@ -51,7 +51,8 @@
     "export": "Export",
     "off": "Off",
     "error-message": "Error message",
-    "disconnect": "Disconnect"
+    "disconnect": "Disconnect",
+    "download": "Download"
   },
   "home": {
     "continue-watching": "Continue",
