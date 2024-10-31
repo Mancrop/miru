@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import 'package:miru_app/models/index.dart';
 import 'package:miru_app/controllers/watch/reader_controller.dart';
 import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/utils/log.dart';
+import 'package:miru_app/utils/request.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:miru_app/utils/miru_storage.dart';
@@ -205,9 +207,19 @@ class ComicController extends ReaderController<ExtensionMangaWatch> {
   }
 
   @override
-  void download() {
-    var urls = super.watchData.value!.urls;
-    logger.info('Comic: Download Button Pressed $urls');
+  void download() async {
+    var data = await getWatchData();
+
+    if (data is ExtensionMangaWatch) {
+      var urls = data.urls;
+      logger.info('Comic: Download Button Pressed $urls');
+      urls.asMap().forEach((index, url) {
+        dio.download(url, 
+          'C:\\Users\\xs\\Desktop\\123\\$index.jpg',
+          options: Options(headers: data.headers),
+        );
+      });
+    }
     downloadSet.value = false;
   }
 }

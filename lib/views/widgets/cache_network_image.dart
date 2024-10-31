@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:extended_image/extended_image.dart';
@@ -7,7 +8,9 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:logging/src/logger.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/views/widgets/messenger.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
@@ -64,6 +67,8 @@ class CacheNetWorkImagePic extends StatelessWidget {
       },
     );
 
+    // dio.download(url, 'C:\\Users\\xs\\Desktop\\123\\${url.hashCode.toString()}.jpg', options: Options(headers: headers)).then((value) => logger.i('下载成功'));
+
     if (canFullScreen) {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -89,6 +94,10 @@ class CacheNetWorkImagePic extends StatelessWidget {
 
     return image;
   }
+}
+
+extension on Logger {
+  i(String s) {}
 }
 
 class _ThumnailPage extends StatefulWidget {

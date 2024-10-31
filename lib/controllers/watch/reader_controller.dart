@@ -7,6 +7,7 @@ import 'package:miru_app/controllers/home_controller.dart';
 import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/data/services/extension_service.dart';
 import 'package:miru_app/utils/log.dart';
+import 'package:miru_app/utils/request.dart';
 
 class ReaderController<T> extends GetxController {
   final String title;
@@ -54,11 +55,19 @@ class ReaderController<T> extends GetxController {
     }
   }
 
+  Future<Object?> getWatchData() async {
+    try {
+      return await runtime.watch(cuurentPlayUrl);
+    } catch (e) {
+      return null;
+    }
+  }
+
   void previousPage() {}
 
   void nextPage() {}
 
-  void download() { 
+  void download() async { 
     logger.info('Download Button Pressed');
     downloadSet.value = false; 
   }
