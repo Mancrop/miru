@@ -33,12 +33,10 @@ class ApplicationController extends GetxController {
           primaryColorLight: Colors.black,
           colorScheme: const ColorScheme.dark(
             primary: Colors.white,
-            onBackground: Colors.white,
             onSecondary: Colors.white,
             onSurface: Colors.white,
             secondary: Colors.grey,
             surface: Colors.black,
-            background: Colors.black,
             onPrimary: Colors.black,
             primaryContainer: Color.fromARGB(255, 31, 31, 31),
             surfaceTint: Colors.black,
