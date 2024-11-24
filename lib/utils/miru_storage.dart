@@ -135,6 +135,9 @@ class MiruStorage {
     await _initSetting(SettingKey.subtitleBackgroundColor, Colors.black.value);
     await _initSetting(SettingKey.subtitleBackgroundOpacity, 0.5);
     await _initSetting(SettingKey.subtitleTextAlign, TextAlign.center.index);
+
+    await _initSetting(SettingKey.downloadPath, "");
+    await _initSetting(SettingKey.downloadMaxTask, 3);
   }
 
   static _initSetting(String key, dynamic value) async {
@@ -201,4 +204,7 @@ class SettingKey {
   static const subtitleTextAlign = "SubtitleTextAlign";
   static const subtitleLastLanguageSelected = "SubtitleLastLanguageSelected";
   static const subtitleLastTitleSelected = "SubtitleLastTitleSelected";
+  // Setting for downloader
+  static const downloadPath = "DownloadPath";
+  static const downloadMaxTask = "DownloadMaxTask";
 }

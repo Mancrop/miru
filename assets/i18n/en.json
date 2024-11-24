@@ -148,7 +148,14 @@
     "save-log-subtitle": "Auto save log file",
     "export-log": "Export Log",
     "export-log-subtitle": "Export log file",
-    "advanced": "Advanced"
+    "advanced": "Advanced",
+    "download": "Download",
+    "download-subtitle": "Download Manager settings",
+    "download-path": "Download Path",
+    "download-path-subtitle": "Select the download path",
+    "download-path-select": "Select",
+    "download-max-task": "Max Task",
+    "download-max-task-subtitle": "Max download tasks. To avoid network congestion, it is recommended to set a reasonable value"
   },
   "external-player-launching": "Launching {player}",
   "detail": {

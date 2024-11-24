@@ -38,6 +38,16 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late SettingsController c;
+  String downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
+  final downloadPathController = TextEditingController(text: MiruStorage.getSetting(SettingKey.downloadPath));
+
+  void _updateDownloadPath(String newPath) {
+    setState(() {
+      downloadPath = newPath;
+    });
+    MiruStorage.setSetting(SettingKey.downloadPath, newPath);
+    downloadPathController.text = newPath;
+  }
 
   @override
   void initState() {
@@ -414,6 +424,71 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         title: 'settings.tracking'.i18n,
         subTitle: 'settings.tracking-subtitle'.i18n,
+      ),
+      const SizedBox(height: 10),
+      SettingsExpanderTile(
+        icon: fluent.FluentIcons.download,
+        androidIcon: Icons.download,
+        content: Column(
+          children: [
+            SettingsTile(
+                title: 'settings.download-path'.i18n,
+                buildSubtitle: () => 'settings.download-path-subtitle'.i18n,
+                trailing: PlatformWidget(
+                  androidWidget: TextButton(
+                    // Todo
+                    onPressed: () async {
+                      var path = await FilePicker.platform.getDirectoryPath();
+                      if (path != null) {
+                        path += '/Miru';
+                        MiruStorage.setSetting(SettingKey.downloadPath, path);
+                      }
+                    },
+                    child: Text('settings.download-path-select'.i18n),
+                  ),
+                  desktopWidget: fluent.Row(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width *
+                            0.5, // 使用屏幕宽度的60%
+                        child: fluent.TextBox(
+                          placeholder: downloadPath,
+                          readOnly: true,
+                          scrollPhysics: BouncingScrollPhysics(),
+                          controller: downloadPathController,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      fluent.FilledButton(
+                        onPressed: () async {
+                          var path =
+                              await FilePicker.platform.getDirectoryPath();
+                          if (path != null) {
+                            path += '/Miru';
+                            _updateDownloadPath(path);
+                          }
+                        },
+                        child: Text('settings.download-path-select'.i18n),
+                      ),
+                    ],
+                  ),
+                )),
+            const SizedBox(height: 10),
+            SettingsIntpuTile(
+              title: 'settings.download-max-task'.i18n,
+              buildSubtitle: () => 'settings.download-max-task-subtitle'.i18n,
+              onChanged: (value) {
+                MiruStorage.setSetting(SettingKey.downloadMaxTask, value);
+              },
+              buildText: () {
+                return MiruStorage.getSetting(SettingKey.downloadMaxTask)
+                    .toString();
+              },
+            ),
+          ],
+        ),
+        title: 'settings.download'.i18n,
+        subTitle: 'settings.download-subtitle'.i18n,
       ),
       const SizedBox(height: 20),
       // 高级
