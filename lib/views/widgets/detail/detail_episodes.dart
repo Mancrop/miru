@@ -8,6 +8,7 @@ import 'package:miru_app/views/widgets/detail/detail_continue_play.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/views/widgets/card_tile.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/views/widgets/detail/detail_download_button.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DetailEpisodes extends StatefulWidget {
@@ -162,7 +163,9 @@ class _DetailEpisodesState extends State<DetailEpisodes> {
         ]),
         trailing: Row(
           children: [
-            const DetailContinuePlay(),
+            DetailDownloadButton(tag: widget.tag),
+            const SizedBox(width: 8),
+            DetailContinuePlay(tag: widget.tag),
             const SizedBox(width: 8),
             fluent.ComboBox<int>(
               items: comboBoxItems,

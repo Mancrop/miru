@@ -436,7 +436,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 buildSubtitle: () => 'settings.download-path-subtitle'.i18n,
                 trailing: PlatformWidget(
                   androidWidget: TextButton(
-                    // Todo
+                    // Todo： 完成安卓组件的编写
                     onPressed: () async {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {

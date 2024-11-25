@@ -108,16 +108,17 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
     return Obx(() {
       final history = c.history.value;
       final data = c.detail!;
+      final isDownloadSelectorState = c.isDownloadSelectorState.value;
       if (history != null && c.history.value!.episodeTitle.isNotEmpty) {
         return fluent.FilledButton(
-          onPressed: () {
+          onPressed: !isDownloadSelectorState ? () {
             c.goWatch(
               context,
               data.episodes![history.episodeGroupId].urls,
               history.episodeId,
               history.episodeGroupId,
             );
-          },
+          } : null,
           child: Row(
             children: [
               const Icon(fluent.FluentIcons.play),

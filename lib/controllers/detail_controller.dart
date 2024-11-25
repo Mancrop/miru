@@ -45,6 +45,8 @@ class DetailPageController extends GetxController {
   final RxString aniListID = ''.obs;
   final Rx<TMDBDetail?> tmdb = Rx(null);
   final Rx<ExtensionService?> runtime = Rx(null);
+  final RxBool isDownloadSelectorState = false.obs;
+
   ExtensionType get type =>
       runtime.value?.extension.type ?? ExtensionType.bangumi;
   Extension? get extension => runtime.value?.extension;
@@ -423,6 +425,10 @@ class DetailPageController extends GetxController {
         }),
       ),
     );
+  }
+
+  changeDownloadSelectorState() {
+    isDownloadSelectorState.value = !isDownloadSelectorState.value;
   }
 
   @override
