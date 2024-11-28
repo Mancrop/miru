@@ -23,9 +23,37 @@ class _DetailDownloadButtonState extends State<DetailDownloadButton> {
   late DetailPageController c = Get.find<DetailPageController>(tag: widget.tag);
   
   Widget _buildAndroid(BuildContext context) {
-    // TODO: implement _buildAndroid
-    // 返回待实现组件
-    return TextButton(child: Text("TODO: Download"), onPressed: () {});
+    return Obx(() {
+      final isDownloadSelectorState = c.isDownloadSelectorState.value;
+      if (!isDownloadSelectorState) {
+        return TextButton(
+          onPressed: () {
+            c.changeDownloadSelectorState();
+          },
+          child: Row(
+            children: [
+              const Icon(fluent.FluentIcons.download),
+              const SizedBox(width: 10),
+              Text('detail.download'.i18n),
+            ],
+          ),
+        );
+      } else {
+        return TextButton(
+          onPressed: () {
+            c.changeDownloadSelectorState();
+          },
+          child: Row(
+            children: [
+              const Icon(fluent.FluentIcons.check_mark),
+              const SizedBox(width: 10),
+              Text('detail.confirm'.i18n),
+            ],
+          ),
+        );
+      }
+    });
+    
   }
 
   Widget _buildDesktop(BuildContext context) {

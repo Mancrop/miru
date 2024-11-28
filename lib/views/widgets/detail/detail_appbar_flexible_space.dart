@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/views/widgets/detail/detail_continue_play.dart';
+import 'package:miru_app/views/widgets/detail/detail_download_button.dart';
 import 'package:miru_app/views/widgets/detail/detail_extension_tile.dart';
 import 'package:miru_app/views/widgets/detail/detail_favorite_button.dart';
 import 'package:miru_app/views/widgets/cache_network_image.dart';
@@ -96,7 +97,7 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
             ),
             Positioned(
               left: 20,
-              bottom: 105,
+              bottom: 135,
               right: 20,
               child: Row(
                 children: [
@@ -145,22 +146,36 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
               top: null,
               left: 20,
               right: 20,
-              bottom: 40,
-              child: Row(
+              bottom: 20,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: DetailContinuePlay(
-                      tag: widget.tag,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DetailContinuePlay(
+                          tag: widget.tag,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      DetailFavoriteButton(
+                          tag: widget.tag,
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    width: 20,
+                  SizedBox(
+                    height: 5,
                   ),
-                  Expanded(
-                    child: DetailFavoriteButton(
-                      tag: widget.tag,
-                    ),
-                  )
+                  Row(
+                    children: [
+                      Expanded(child: 
+                        DetailDownloadButton(
+                          tag: widget.tag,
+                        ),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),
