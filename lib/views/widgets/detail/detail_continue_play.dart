@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DetailContinuePlay extends StatefulWidget {
@@ -25,6 +26,8 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
     return Obx(() {
       late String noEpisodesString;
       late String watchNowString;
+      final isDownloadSelectorState = c.isDownloadSelectorState.value;
+
       if (c.type == ExtensionType.bangumi) {
         noEpisodesString = 'video.no-episodes'.i18n;
         watchNowString = 'video.watch-now'.i18n;
@@ -34,7 +37,7 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
       }
 
       final noEpisodes = FilledButton.icon(
-        onPressed: () {},
+        onPressed: !isDownloadSelectorState ? () {} : null,
         icon: const Icon(Icons.play_arrow),
         label: Text(noEpisodesString),
         style: ButtonStyle(
@@ -46,29 +49,29 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
         ),
       );
 
-      final history = c.history.value;
       final data = c.detail;
       if (c.isLoading.value) {
         return noEpisodes;
       }
       // 之前弄错了，所以需要判断标题是否为空
       if (c.history.value != null && c.history.value!.episodeTitle.isNotEmpty) {
+        final history = c.history.value!;
         return FilledButton.icon(
-          onPressed: () {
+          onPressed: !isDownloadSelectorState ? () {
             c.goWatch(
               context,
               data!.episodes![history.episodeGroupId].urls,
               history.episodeId,
               history.episodeGroupId,
             );
-          },
+          } : null,
           icon: const Icon(Icons.play_arrow),
           label: Text(
             FlutterI18n.translate(
               context,
               'detail.continue-watching',
               translationParams: {
-                'episode': history!.episodeTitle,
+                'episode': history.episodeTitle,
               },
             ),
             maxLines: 1,
@@ -83,14 +86,14 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
       }
       if (data!.episodes != null && data.episodes!.isNotEmpty) {
         return FilledButton.icon(
-          onPressed: () {
+          onPressed: !isDownloadSelectorState ? () {
             c.goWatch(
               context,
               data.episodes![0].urls,
               0,
               0,
             );
-          },
+          } : null,
           icon: const Icon(Icons.play_arrow),
           label: Text(watchNowString),
           style: ButtonStyle(

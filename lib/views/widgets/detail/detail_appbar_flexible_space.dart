@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/views/widgets/detail/detail_continue_play.dart';
@@ -72,28 +73,17 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
               width: double.infinity,
               child: c.isLoading.value
                   ? const SizedBox.shrink()
-                  : Cover(
-                      alt: c.data.value?.title ?? '',
-                      url: c.backgorund,
-                      noText: true,
-                      headers: c.detail?.headers,
+                  : Animate(
+                      child: Cover(
+                        alt: c.detail?.title ?? '',
+                        url: c.backgorund,
+                        noText: true,
+                        headers: c.detail?.headers,
+                      ),
+                    ).blur(
+                      begin: const Offset(300, 300),
+                      end: const Offset(300, 300),
                     ),
-            ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      // 主题背景色
-                      Theme.of(context).colorScheme.surface.withOpacity(0.3),
-                      Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                      Theme.of(context).colorScheme.surface,
-                    ],
-                  ),
-                ),
-              ),
             ),
             Positioned(
               left: 20,
@@ -160,7 +150,7 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
                         width: 20,
                       ),
                       DetailFavoriteButton(
-                          tag: widget.tag,
+                        tag: widget.tag,
                       ),
                     ],
                   ),
@@ -169,8 +159,8 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
                   ),
                   Row(
                     children: [
-                      Expanded(child: 
-                        DetailDownloadButton(
+                      Expanded(
+                        child: DetailDownloadButton(
                           tag: widget.tag,
                         ),
                       )

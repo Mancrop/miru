@@ -230,8 +230,9 @@ class _DetailPageState extends State<DetailPage> {
               Expanded(
                 child: SafeArea(
                     child: DetailEpisodes(
-                  tag: widget.tag,
-                )),
+                      tag: widget.tag,
+                    )
+                ),
               ),
             ],
           );
@@ -264,8 +265,8 @@ class _DetailPageState extends State<DetailPage> {
               headers: c.detail?.headers,
             ),
           ).blur(
-            begin: const Offset(10, 10),
-            end: const Offset(0, 0),
+            begin: const Offset(100, 100),
+            end: const Offset(100, 100),
           ),
           Positioned.fill(
             child: DetailBackgroundColor(controller: c.scrollController),
