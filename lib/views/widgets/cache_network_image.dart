@@ -6,11 +6,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/views/widgets/messenger.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 
 class CacheNetWorkImagePic extends StatelessWidget {
   const CacheNetWorkImagePic(
@@ -124,14 +124,15 @@ class _ThumnailPageState extends State<_ThumnailPage> {
       ),
     );
     if (Platform.isAndroid) {
-      final result = await ImageGallerySaver.saveImage(
+      final result = await SaverGallery.saveImage(
         res.data,
-        name: fileName,
+        fileName: fileName,
+        skipIfExists: false,
       );
       if (mounted) {
-        final msg = result['isSuccess'] == true
+        final msg = result.isSuccess == true
             ? 'common.save-success'.i18n
-            : result['errorMessage'];
+            : result.errorMessage!;
         showPlatformSnackbar(
           context: context,
           content: msg,
