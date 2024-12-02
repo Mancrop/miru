@@ -265,8 +265,8 @@ class _DetailPageState extends State<DetailPage> {
               headers: c.detail?.headers,
             ),
           ).blur(
-            begin: const Offset(100, 100),
-            end: const Offset(100, 100),
+            begin: const Offset(300, 300),
+            end: const Offset(300, 300),
           ),
           Positioned.fill(
             child: DetailBackgroundColor(controller: c.scrollController),

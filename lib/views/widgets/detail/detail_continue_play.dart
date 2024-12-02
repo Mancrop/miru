@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/utils/i18n.dart';
-import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DetailContinuePlay extends StatefulWidget {
