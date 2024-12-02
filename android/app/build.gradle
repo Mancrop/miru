@@ -5,6 +5,38 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
+def _storeFile = file(System.getenv("KEYSTORE") ?: keystoreProperties.getProperty("storeFile") ?: "keystore.jks")
+def _storePassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProperties.getProperty("storePassword")
+def _keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProperties.getProperty("keyAlias")
+def _keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProperties.getProperty("keyPassword")
+
+
 android {
     namespace = "miru.miaomint"
     compileSdk = flutter.compileSdkVersion
@@ -35,41 +67,41 @@ android {
         versionName = flutter.versionName
     }
 
-    // signingConfigs {
-    //     release {
-    //         storeFile = _storeFile
-    //         storePassword = _storePassword
-    //         keyAlias = _keyAlias
-    //         keyPassword = _keyPassword
-    //         v1SigningEnabled = true
-    //         v2SigningEnabled = true
-    //     }
-    //     debug {
-    //         storeFile = _storeFile
-    //         storePassword = _storePassword
-    //         keyAlias = _keyAlias
-    //         keyPassword = _keyPassword
-    //         v1SigningEnabled = true
-    //         v2SigningEnabled = true
-    //     }
-    // }
+    signingConfigs {
+        release {
+            storeFile = _storeFile
+            storePassword = _storePassword
+            keyAlias = _keyAlias
+            keyPassword = _keyPassword
+            v1SigningEnabled = true
+            v2SigningEnabled = true
+        }
+        debug {
+            storeFile = _storeFile
+            storePassword = _storePassword
+            keyAlias = _keyAlias
+            keyPassword = _keyPassword
+            v1SigningEnabled = true
+            v2SigningEnabled = true
+        }
+    }
     
     buildTypes {
-        // release {
-        //     if (signingConfigs.release.storePassword != null){
-        //         signingConfig = signingConfigs.release
-        //     }
-        // }
-        // debug {
-        //     if (signingConfigs.debug.storePassword != null){
-        //         signingConfig = signingConfigs.release
-        //     }
-        // }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            if (signingConfigs.release.storePassword != null){
+                signingConfig = signingConfigs.release
+            }
         }
+        debug {
+            if (signingConfigs.debug.storePassword != null){
+                signingConfig = signingConfigs.release
+            }
+        }
+        // release {
+        //     // TODO: Add your own signing config for the release build.
+        //     // Signing with the debug keys for now, so `flutter run --release` works.
+        //     signingConfig = signingConfigs.debug
+        // }
     }
 }
 
@@ -81,13 +113,13 @@ dependencies {
 
 }
 
-// ext.abiCodes = ["x86_64": 1, "armeabi-v7a": 2, "arm64-v8a": 3]
-// import com.android.build.OutputFile
-// android.applicationVariants.all { variant ->
-//   variant.outputs.each { output ->
-//     def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-//     if (abiVersionCode != null) {
-//       output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
-//     }
-//   }
-// }
+ext.abiCodes = ["x86_64": 1, "armeabi-v7a": 2, "arm64-v8a": 3]
+import com.android.build.OutputFile
+android.applicationVariants.all { variant ->
+  variant.outputs.each { output ->
+    def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+    if (abiVersionCode != null) {
+      output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+    }
+  }
+}
