@@ -128,13 +128,22 @@
     "save-log-subtitle": "Guardar automáticamente el archivo de registros",
     "export-log": "Exportar registros",
     "export-log-subtitle": "Exportar archivo de registros",
-    "advanced": "Avanzado"
+    "advanced": "Avanzado",
+    "download": "Descargar",
+    "download-subtitle": "Configuración del gestor de descargas",
+    "download-path": "Ruta de descarga",
+    "download-path-subtitle": "Seleccionar la ruta de descarga",
+    "download-path-select": "Seleccionar",
+    "download-max-task": "Tarea máxima",
+    "download-max-task-subtitle": "Tareas máximas de descarga. Para evitar la congestión de la red, se recomienda establecer un valor razonable"
   },
   "external-player-launching": "Lanzando {player}",
   "detail": {
     "tracking": "Siguiendo",
     "favorite": "Favorito",
     "favorited": "Favorito",
+    "download": "Descargar",
+    "confirm": "Confirmar",
     "continue-watching": "Continuar {episode}",
     "total-episodes": "Total {total}",
     "overview": "Descripción general",

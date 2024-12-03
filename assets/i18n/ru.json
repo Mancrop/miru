@@ -25,7 +25,7 @@
     "previous": "Предыдущее",
     "show-all": "Показать всё",
     "delete": "Удалить",
-    "delete-all": "Удалить всё"
+    "delete-all": "Удалить всё",
     "save": "Сохранить",
     "save-success": "Сохранение прошло успешно",
     "logout": "Выйти",
@@ -41,7 +41,7 @@
     "continue-watching": "Продолжить",
     "favorite": "Избранное",
     "no-record": "Нет избранного или просмотра записей",
-    "watched": "Просмотрен {ep}"
+    "watched": "Просмотрен {ep}",
     "favorite-all": "Все {type} избранные"
   },
   "search": {
@@ -132,12 +132,21 @@
     "save-log-subtitle": "Автоматическое сохранение файла журнала",
     "export-log": "Экспортировать журнал",
     "export-log-subtitle": "Экспорт файла журнала",
-    "advanced": "Расширенные"
+    "advanced": "Расширенные",
+    "download": "Скачать",
+    "download-subtitle": "Настройки диспетчера загрузок",
+    "download-path": "Путь загрузки",
+    "download-path-subtitle": "Выберите путь загрузки",
+    "download-path-select": "Выбрать",
+    "download-max-task": "Максимальное количество задач",
+    "download-max-task-subtitle": "Максимальное количество задач загрузки. Чтобы избежать перегрузки сети, рекомендуется установить разумное значение"
   },
   "external-player-launching": "Запуск {player}",
   "detail": {
     "favorite": "Избранное",
     "favorited": "В избранных",
+    "download": "Скачать",
+    "confirm": "Подтвердить",
     "continue-watching": "Продолжить {episode}",
     "total-episodes": "Всего {total}",
     "overview": "Обзор",

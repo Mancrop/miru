@@ -131,13 +131,22 @@
     "save-log-subtitle": "Simpan file log secara otomatis",
     "export-log": "Export Log",
     "export-log-subtitle": "Ekspor log ke file",
-    "advanced": "Lanjutan"
+    "advanced": "Lanjutan",
+    "download": "Unduh",
+    "download-subtitle": "Pengaturan Pengelola Unduhan",
+    "download-path": "Jalur Unduhan",
+    "download-path-subtitle": "Pilih jalur unduhan",
+    "download-path-select": "Pilih",
+    "download-max-task": "Tugas Maksimum",
+    "download-max-task-subtitle": "Tugas unduhan maksimum. Untuk menghindari kemacetan jaringan, disarankan untuk menetapkan nilai yang wajar"
   },
   "external-player-launching": "Menjalankan {player}",
   "detail": {
     "tracking": "Pelacakan",
     "favorite": "Favorit",
     "favorited": "Favorit",
+    "download": "Unduh",
+    "confirm": "Konfirmasi",
     "continue-watching": "Lanjutkan {episode}",
     "total-episodes": "Total {total}",
     "overview": "Ringkasan",

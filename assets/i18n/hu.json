@@ -148,13 +148,22 @@
         "save-log-subtitle": "A naplófájl automatikus mentése",
         "export-log": "Napló exportálása",
         "export-log-subtitle": "Naplófájl exportálása",
-        "advanced": "Haladó"
+        "advanced": "Haladó",
+        "download": "Letöltés",
+        "download-subtitle": "Letöltéskezelő beállításai",
+        "download-path": "Letöltési útvonal",
+        "download-path-subtitle": "Válassza ki a letöltési útvonalat",
+        "download-path-select": "Kiválaszt",
+        "download-max-task": "Maximális feladat",
+        "download-max-task-subtitle": "Maximális letöltési feladatok. A hálózati torlódás elkerülése érdekében ajánlott ésszerű értéket beállítani"
     },
     "external-player-launching": "{player} indítása",
     "detail": {
         "tracking": "Trackelés",
         "favorite": "Kedvenc",
         "favorited": "Kedvenc",
+        "download": "Letöltés",
+        "confirm": "Megerősít",
         "continue-watching": "{episode} Folytatása",
         "total-episodes": "Összesen {total}",
         "overview": "Áttekintés",

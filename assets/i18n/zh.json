@@ -127,7 +127,14 @@
     "save-log-subtitle": "自动保存日志文件",
     "export-log": "导出日志",
     "export-log-subtitle": "导出日志文件到本地",
-    "advanced": "高级"
+    "advanced": "高级",
+    "download": "下载",
+    "download-subtitle": "下载管理器设置",
+    "download-path": "下载路径",
+    "download-path-subtitle": "选择下载路径",
+    "download-path-select": "选择",
+    "download-max-task": "最大任务",
+    "download-max-task-subtitle": "最大下载任务数。为避免网络拥堵，建议设置一个合理的值"
   },
   "external-player-launching": "正在启动 {player}",
   "detail": {
