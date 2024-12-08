@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:isar/isar.dart';
 import 'package:miru_app/models/index.dart';
+import 'package:miru_app/models/offline_resource.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 
@@ -114,6 +115,20 @@ class DatabaseService {
   // 删除全部历史
   static Future<void> deleteAllHistory() async {
     return db.writeTxn(() => db.historys.where().deleteAll());
+  }
+
+  // 添加资源
+  static Future<Id> putOfflineResourceByPath(
+      OfflineResource offlineResource) async {
+    return db.writeTxn(
+        () => db.offlineResources.putByIndex(r'path', offlineResource));
+  }
+
+  // 删除资源
+  static Future<void> deleteOfflineResourceByPath(String path) async {
+    return db.writeTxn(
+      () => db.offlineResources.filter().pathEqualTo(path).deleteAll(),
+    );
   }
 
   // 扩展设置
