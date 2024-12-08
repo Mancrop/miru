@@ -1,4 +1,20 @@
 {
+  "languages": {
+    "be": "Беларуская",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "hu": "Magyar",
+    "hi": "हिंदी",
+    "id": "Indonesia",
+    "ja": "日本語",
+    "pl": "Polski",
+    "ru": "Русский",
+    "ryu": "うちなーぐち",
+    "uk": "Українська",
+    "zh": "中文",
+    "zhHant": "繁體中文"
+  },
   "common": {
     "anime": "Anime",
     "manga": "Manga",
@@ -55,7 +71,8 @@
       "url-label": "URL Ekstensi",
       "tips": "Kamu dapat mengimpor ekstensi melalui URL, atau mengeklik direktori ekstensi di bawah dan meletakkan file ekstensi di sana.",
       "extension-dir": "Direktori Ekstensi",
-      "import-by-url": "Impor berdasarkan URL"
+      "import-by-url": "Impor berdasarkan URL",
+      "import-by-local": "Impor secara lokal"
     },
     "error-dialog": "Pesan Kesalahan",
     "installed": "Terinstall",
@@ -272,7 +289,7 @@
     "release-date": "Tanggal Rilis",
     "genres": "Genr",
     "runtime": "Runtime",
-    "languages": "Bahasa"
+    "languages": "Languages"
   },
   "bt-server": {
     "not-installed": "BT-Server tidak diinstal",

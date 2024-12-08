@@ -1,4 +1,20 @@
 {
+  "languages": {
+    "be": "Беларуская",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "hu": "Magyar",
+    "hi": "हिंदी",
+    "id": "Indonesia",
+    "ja": "日本語",
+    "pl": "Polski",
+    "ru": "Русский",
+    "ryu": "うちなーぐち",
+    "uk": "Українська",
+    "zh": "中文",
+    "zhHant": "繁體中文"
+  },
   "common": {
     "anime": "Аниме",
     "manga": "Манга",
@@ -143,6 +159,7 @@
   },
   "external-player-launching": "Запуск {player}",
   "detail": {
+    "tracking": "Отслеживание",
     "favorite": "Избранное",
     "favorited": "В избранных",
     "download": "Скачать",
@@ -155,7 +172,8 @@
     "get-lastest-data-error": "Не удалось получить последние данные",
     "modify-tmdb-binding": "Изменить привязку TMDB",
     "no-tmdb-data": "Данные TMDB не совпадают, привяжите данные самостоятельно",
-    "tmdb-key-missing": "Ключ API TMDB отсутствует, заполните настройки"
+    "tmdb-key-missing": "Ключ API TMDB отсутствует, заполните настройки",
+    "tracker": "Отслеживание"
   },
   "video": {
     "episodes": "Эпизоды",
@@ -168,6 +186,10 @@
     "subtitle-change": "Редактировать субтитры {title}",
     "subtitle-file": "Файл субтитров",
     "torrent-downloading": "Торрент-скачивание",
+    "no-qualities": "Качество отсутствует",
+    "audio": "Аудио",
+    "getting-streamlink": "Получение streamlink...",
+    "streamlink-error": "Не удалось получить streamlink",
     "tooltip": {
       "close": "Закрыть",
       "subtitle": "Субтитры",
@@ -267,7 +289,7 @@
     "release-date": "Дата выпуска",
     "genres": "Жанры",
     "runtime": "Время выполнения",
-    "languages": "Языки"
+    "languages": "Languages"
   },
   "bt-server": {
     "not-installed": "BT-сервер не установлен",

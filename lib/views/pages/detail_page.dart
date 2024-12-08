@@ -9,6 +9,7 @@ import 'package:miru_app/views/pages/webview_page.dart';
 import 'package:miru_app/views/widgets/detail/detail_appbar_flexible_space.dart';
 import 'package:miru_app/views/widgets/detail/detail_appbar_title.dart';
 import 'package:miru_app/views/widgets/detail/detail_background_color.dart';
+import 'package:miru_app/views/widgets/detail/detail_download_button.dart';
 import 'package:miru_app/views/widgets/detail/detail_episodes.dart';
 import 'package:miru_app/views/widgets/detail/detail_extension_tile.dart';
 import 'package:miru_app/views/widgets/detail/detail_favorite_button.dart';
@@ -110,7 +111,9 @@ class _DetailPageState extends State<DetailPage> {
                     DetailTrackingButton(
                       tag: widget.tag,
                     ),
-
+                    DetailDownloadButton(
+                      tag: widget.tag,
+                    ),
                     // webview
                     IconButton(
                       onPressed: () {

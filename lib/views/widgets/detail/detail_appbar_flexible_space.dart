@@ -1,9 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/views/widgets/detail/detail_continue_play.dart';
-import 'package:miru_app/views/widgets/detail/detail_download_button.dart';
 import 'package:miru_app/views/widgets/detail/detail_extension_tile.dart';
 import 'package:miru_app/views/widgets/detail/detail_favorite_button.dart';
 import 'package:miru_app/views/widgets/cache_network_image.dart';
@@ -44,10 +45,10 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
   double _scrollListener() {
     if (_offset <= 0) {
       return 1;
-    } else if (_offset >= 300) {
+    } else if (_offset >= 270) {
       return 0;
     } else {
-      return (_offset - 300) / (0 - 300);
+      return (_offset - 270) / (0 - 270);
     }
   }
 
@@ -71,19 +72,7 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
             SizedBox(
               height: 400,
               width: double.infinity,
-              child: c.isLoading.value
-                  ? const SizedBox.shrink()
-                  : Animate(
-                      child: Cover(
-                        alt: c.detail?.title ?? '',
-                        url: c.backgorund,
-                        noText: true,
-                        headers: c.detail?.headers,
-                      ),
-                    ).blur(
-                      begin: const Offset(300, 300),
-                      end: const Offset(300, 300),
-                    ),
+              child: const SizedBox.shrink()
             ),
             Positioned(
               left: 20,
@@ -120,6 +109,8 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
                             c.isLoading.value ? "" : c.data.value!.title,
                             softWrap: true,
                             style: Get.theme.textTheme.titleLarge,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 10),
                           DetailExtensionTile(
@@ -154,17 +145,8 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
                       ),
                     ],
                   ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DetailDownloadButton(
-                          tag: widget.tag,
-                        ),
-                      )
-                    ],
+                  const SizedBox(
+                    height: 25,
                   ),
                 ],
               ),

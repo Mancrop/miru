@@ -1,5 +1,3 @@
-
-
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +6,7 @@ import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DetailDownloadButton extends StatefulWidget {
-   const DetailDownloadButton({
+  const DetailDownloadButton({
     super.key,
     this.tag,
   });
@@ -21,39 +19,26 @@ class DetailDownloadButton extends StatefulWidget {
 
 class _DetailDownloadButtonState extends State<DetailDownloadButton> {
   late DetailPageController c = Get.find<DetailPageController>(tag: widget.tag);
-  
+
   Widget _buildAndroid(BuildContext context) {
     return Obx(() {
       final isDownloadSelectorState = c.isDownloadSelectorState.value;
       if (!isDownloadSelectorState) {
-        return TextButton(
+        return IconButton(
           onPressed: () {
             c.changeDownloadSelectorState();
           },
-          child: Row(
-            children: [
-              const Icon(fluent.FluentIcons.download),
-              const SizedBox(width: 10),
-              Text('detail.download'.i18n),
-            ],
-          ),
+          icon: const Icon(fluent.FluentIcons.download),
         );
       } else {
-        return TextButton(
+        return IconButton(
           onPressed: () {
             c.changeDownloadSelectorState();
           },
-          child: Row(
-            children: [
-              const Icon(fluent.FluentIcons.check_mark),
-              const SizedBox(width: 10),
-              Text('detail.confirm'.i18n),
-            ],
-          ),
+          icon: const Icon(fluent.FluentIcons.check_mark),
         );
       }
     });
-    
   }
 
   Widget _buildDesktop(BuildContext context) {
@@ -86,7 +71,6 @@ class _DetailDownloadButtonState extends State<DetailDownloadButton> {
           ),
         );
       }
-      
     });
   }
 
