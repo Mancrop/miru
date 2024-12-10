@@ -19,12 +19,14 @@ enum ResourceSource {
 class Item {
   late String title;
   late String subPath;
+  late String url;
   late String? cover;
 }
 
 @Collection()
 class OfflineResource {
   Id id = Isar.autoIncrement;
+  bool virtualResource = true;
   @Enumerated(EnumType.name)
   late ResourceSource source;
 

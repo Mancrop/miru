@@ -9,7 +9,9 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_windows_webview/flutter_windows_webview.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/data/providers/tmdb_provider.dart';
+import 'package:miru_app/data/services/offline_resource_service.dart';
 import 'package:miru_app/models/index.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/dialogs/tmdb_binding.dart';
 import 'package:miru_app/controllers/home_controller.dart';
 import 'package:miru_app/controllers/main_controller.dart';
@@ -428,6 +430,10 @@ class DetailPageController extends GetxController {
   }
 
   changeDownloadSelectorState() {
+    if (isDownloadSelectorState.value) {
+      final episodes = detail!.episodes![selectEpGroup.value].urls;
+      OfflineResourceService.startMangaDownloadJob(package, url, detail!, selectEpGroup.value, List.generate(episodes.length, (index) => index));
+    }
     isDownloadSelectorState.value = !isDownloadSelectorState.value;
   }
 

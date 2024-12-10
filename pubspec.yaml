@@ -65,6 +65,7 @@ dependencies:
   dlna_dart: ^0.0.8
   re_editor: ^0.6.0
   re_highlight: ^0.0.3
+  flutter_download_manager: ^0.5.5
 
 dev_dependencies:
   flutter_test:

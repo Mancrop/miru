@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:miru_app/models/index.dart';
 import 'package:miru_app/controllers/watch/comic_controller.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/button.dart';
 import 'package:miru_app/views/widgets/cache_network_image.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
@@ -144,6 +145,7 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
                         scrollOffsetController: _c.scrollOffsetController,
                         itemBuilder: (context, index) {
                           final url = images[index];
+                          logger.info(url);
                           return CacheNetWorkImagePic(
                             url,
                             fit: BoxFit.fitWidth,
@@ -169,6 +171,7 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
                 controller: _c.pageController.value,
                 itemBuilder: (BuildContext context, int index) {
                   final url = images[index];
+                  logger.info(url);
                   return Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: viewPadding,

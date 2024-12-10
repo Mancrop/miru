@@ -28,6 +28,7 @@ import 'package:miru_app/views/widgets/platform_widget.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path/path.dart' as p;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -440,8 +441,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () async {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {
-                        path += '/Miru';
-                        MiruStorage.setSetting(SettingKey.downloadPath, path);
+                        String newPath = p.join(path, 'Miru');
+                        MiruStorage.setSetting(SettingKey.downloadPath, newPath);
                       }
                     },
                     child: Text('settings.download-path-select'.i18n),
@@ -464,8 +465,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           var path =
                               await FilePicker.platform.getDirectoryPath();
                           if (path != null) {
-                            path += '/Miru';
-                            _updateDownloadPath(path);
+                            String newPath = p.join(path, 'Miru');
+                            _updateDownloadPath(newPath);
                           }
                         },
                         child: Text('settings.download-path-select'.i18n),
