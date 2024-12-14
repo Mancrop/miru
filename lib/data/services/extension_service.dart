@@ -489,7 +489,8 @@ class ExtensionService {
   Future<List<ExtensionListItem>> latest(int page) async {
     return runExtension(() async {
       final jsResult = await runtime.handlePromise(
-        await runtime.evaluateAsync('stringify(()=>${className}Instance.latest($page))'),
+        await runtime
+            .evaluateAsync('stringify(()=>${className}Instance.latest($page))'),
       );
 
       List<ExtensionListItem> result =
@@ -510,7 +511,8 @@ class ExtensionService {
   }) async {
     return runExtension(() async {
       final jsResult = await runtime.handlePromise(
-        await runtime.evaluateAsync('stringify(()=>${className}Instance.search("$kw",$page,${filter == null ? null : jsonEncode(filter)}))'),
+        await runtime.evaluateAsync(
+            'stringify(()=>${className}Instance.search("$kw",$page,${filter == null ? null : jsonEncode(filter)}))'),
       );
       List<ExtensionListItem> result =
           jsonDecode(jsResult.stringResult).map<ExtensionListItem>((e) {
@@ -530,7 +532,8 @@ class ExtensionService {
     if (filter == null) {
       eval = 'stringify(()=>${className}Instance.createFilter())';
     } else {
-      eval = 'stringify(()=>${className}Instance.createFilter(JSON.parse(\'${jsonEncode(filter)}\')))';
+      eval =
+          'stringify(()=>${className}Instance.createFilter(JSON.parse(\'${jsonEncode(filter)}\')))';
     }
     return runExtension(() async {
       final jsResult = await runtime.handlePromise(
@@ -549,7 +552,8 @@ class ExtensionService {
   Future<ExtensionDetail> detail(String url) async {
     return runExtension(() async {
       final jsResult = await runtime.handlePromise(
-        await runtime.evaluateAsync('stringify(()=>${className}Instance.detail("$url"))'),
+        await runtime.evaluateAsync(
+            'stringify(()=>${className}Instance.detail("$url"))'),
       );
       final result =
           ExtensionDetail.fromJson(jsonDecode(jsResult.stringResult));
@@ -561,7 +565,8 @@ class ExtensionService {
   Future<Object?> watch(String url) async {
     return runExtension(() async {
       final jsResult = await runtime.handlePromise(
-        await runtime.evaluateAsync('stringify(()=>${className}Instance.watch("$url"))'),
+        await runtime
+            .evaluateAsync('stringify(()=>${className}Instance.watch("$url"))'),
       );
       final data = jsonDecode(jsResult.stringResult);
 

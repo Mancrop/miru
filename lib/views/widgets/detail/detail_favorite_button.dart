@@ -31,8 +31,7 @@ class _DetailFavoriteButtonState extends State<DetailFavoriteButton> {
               const Size(50, 50),
             ),
             backgroundColor: isFavorite
-                ? WidgetStateProperty.all(
-                    Theme.of(context).colorScheme.primary)
+                ? WidgetStateProperty.all(Theme.of(context).colorScheme.primary)
                 : null,
             foregroundColor: isFavorite
                 ? WidgetStateProperty.all(

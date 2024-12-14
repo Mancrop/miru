@@ -432,7 +432,12 @@ class DetailPageController extends GetxController {
   changeDownloadSelectorState() {
     if (isDownloadSelectorState.value) {
       final episodes = detail!.episodes![selectEpGroup.value].urls;
-      OfflineResourceService.startMangaDownloadJob(package, url, detail!, selectEpGroup.value, List.generate(episodes.length, (index) => index));
+      OfflineResourceService.startMangaDownloadJob(
+          package,
+          url,
+          detail!,
+          selectEpGroup.value,
+          List.generate(episodes.length, (index) => index));
     }
     isDownloadSelectorState.value = !isDownloadSelectorState.value;
   }

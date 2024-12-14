@@ -56,14 +56,16 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
       if (c.history.value != null && c.history.value!.episodeTitle.isNotEmpty) {
         final history = c.history.value!;
         return FilledButton.icon(
-          onPressed: !isDownloadSelectorState ? () {
-            c.goWatch(
-              context,
-              data!.episodes![history.episodeGroupId].urls,
-              history.episodeId,
-              history.episodeGroupId,
-            );
-          } : null,
+          onPressed: !isDownloadSelectorState
+              ? () {
+                  c.goWatch(
+                    context,
+                    data!.episodes![history.episodeGroupId].urls,
+                    history.episodeId,
+                    history.episodeGroupId,
+                  );
+                }
+              : null,
           icon: const Icon(Icons.play_arrow),
           label: Text(
             FlutterI18n.translate(
@@ -85,14 +87,16 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
       }
       if (data!.episodes != null && data.episodes!.isNotEmpty) {
         return FilledButton.icon(
-          onPressed: !isDownloadSelectorState ? () {
-            c.goWatch(
-              context,
-              data.episodes![0].urls,
-              0,
-              0,
-            );
-          } : null,
+          onPressed: !isDownloadSelectorState
+              ? () {
+                  c.goWatch(
+                    context,
+                    data.episodes![0].urls,
+                    0,
+                    0,
+                  );
+                }
+              : null,
           icon: const Icon(Icons.play_arrow),
           label: Text(watchNowString),
           style: ButtonStyle(
@@ -113,14 +117,16 @@ class _DetailContinuePlayState extends State<DetailContinuePlay> {
       final isDownloadSelectorState = c.isDownloadSelectorState.value;
       if (history != null && c.history.value!.episodeTitle.isNotEmpty) {
         return fluent.FilledButton(
-          onPressed: !isDownloadSelectorState ? () {
-            c.goWatch(
-              context,
-              data.episodes![history.episodeGroupId].urls,
-              history.episodeId,
-              history.episodeGroupId,
-            );
-          } : null,
+          onPressed: !isDownloadSelectorState
+              ? () {
+                  c.goWatch(
+                    context,
+                    data.episodes![history.episodeGroupId].urls,
+                    history.episodeId,
+                    history.episodeGroupId,
+                  );
+                }
+              : null,
           child: Row(
             children: [
               const Icon(fluent.FluentIcons.play),

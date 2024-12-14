@@ -40,7 +40,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   late SettingsController c;
   String downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
-  final downloadPathController = TextEditingController(text: MiruStorage.getSetting(SettingKey.downloadPath));
+  final downloadPathController = TextEditingController(
+      text: MiruStorage.getSetting(SettingKey.downloadPath));
 
   void _updateDownloadPath(String newPath) {
     setState(() {
@@ -442,7 +443,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {
                         String newPath = p.join(path, 'Miru');
-                        MiruStorage.setSetting(SettingKey.downloadPath, newPath);
+                        MiruStorage.setSetting(
+                            SettingKey.downloadPath, newPath);
                       }
                     },
                     child: Text('settings.download-path-select'.i18n),

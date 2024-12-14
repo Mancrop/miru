@@ -233,9 +233,8 @@ class _DetailPageState extends State<DetailPage> {
               Expanded(
                 child: SafeArea(
                     child: DetailEpisodes(
-                      tag: widget.tag,
-                    )
-                ),
+                  tag: widget.tag,
+                )),
               ),
             ],
           );
@@ -279,7 +278,11 @@ class _DetailPageState extends State<DetailPage> {
               return SingleChildScrollView(
                 controller: c.scrollController,
                 padding: EdgeInsets.symmetric(
-                  horizontal: constraints.maxWidth > 2000 ? constraints.maxWidth/5 : constraints.maxWidth > 1200 ? constraints.maxWidth/6 : 20,
+                  horizontal: constraints.maxWidth > 2000
+                      ? constraints.maxWidth / 5
+                      : constraints.maxWidth > 1200
+                          ? constraints.maxWidth / 6
+                          : 20,
                   vertical: 16,
                 ),
                 child: Column(

@@ -31,8 +31,17 @@ class OfflineResourceService {
     return path;
   }
 
+  static List<Ep> createVirtualEps(List<ExtensionEpisodeGroup> episodes) {
+    return episodes
+        .map((episode) => Ep()
+          ..virtualResource = true
+          ..title = episode.title
+          ..items = [])
+        .toList();
+  }
+
   static void startMangaDownloadJob(String package, String url,
-      ExtensionDetail details, int ep, List<int> episodesToDownload) async {
+      ExtensionDetail details, int ep, List<int> chaptersToDownload) async {
     // 下载漫画
     OfflineResource resource = OfflineResource();
     resource.source = ResourceSource.fromExtension;
@@ -43,7 +52,8 @@ class OfflineResourceService {
     resource.cover = details.cover;
     resource.path = newDirectory(details.title, ResourceType.manga);
     final episodes = details.episodes ?? [];
-    resource.items = episodesToDownload.map((index) {
+    resource.eps = createVirtualEps(episodes);
+    resource.eps[ep].items = chaptersToDownload.map((index) {
       final episode = episodes[ep].urls[index];
       final item = Item();
       item.title = episode.name;
@@ -57,7 +67,7 @@ class OfflineResourceService {
     // }
     logger.info("package: $package");
     final runtime = ExtensionUtils.runtimes[package]!;
-    for (var item in resource.items) {
+    for (var item in resource.eps[ep].items) {
       final watchData = await runtime.watch(item.url) as ExtensionMangaWatch;
       final path = p.join(resource.path, item.subPath);
       Directory(path).createSync(recursive: true);

@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 
 part 'offline_resource.g.dart';
 
-
 enum ResourceType {
   video,
   manga,
@@ -17,16 +16,24 @@ enum ResourceSource {
 
 @embedded
 class Item {
+  bool virtualResource = true;
   late String title;
   late String subPath;
   late String url;
   late String? cover;
 }
 
+@embedded
+class Ep {
+  bool virtualResource = true;
+  late String title;
+  late List<Item> items;
+  late String subPath;
+}
+
 @Collection()
 class OfflineResource {
   Id id = Isar.autoIncrement;
-  bool virtualResource = true;
   @Enumerated(EnumType.name)
   late ResourceSource source;
 
@@ -40,5 +47,5 @@ class OfflineResource {
   @Index(name: 'path')
   late String path;
 
-  late List<Item> items;
+  late List<Ep> eps;
 }

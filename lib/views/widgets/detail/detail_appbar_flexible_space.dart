@@ -66,10 +66,9 @@ class _DetailAppbarflexibleSpaceState extends State<DetailAppbarflexibleSpace> {
         child: Stack(
           children: [
             SizedBox(
-              height: 400,
-              width: double.infinity,
-              child: const SizedBox.shrink()
-            ),
+                height: 400,
+                width: double.infinity,
+                child: const SizedBox.shrink()),
             Positioned(
               left: 20,
               bottom: 135,
