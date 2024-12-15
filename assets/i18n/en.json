@@ -173,7 +173,8 @@
     "modify-tmdb-binding": "Modify TMDB Binding",
     "no-tmdb-data": "No TMDB data matched, please bind the data yourself",
     "tmdb-key-missing": "TMDB API Key missing, please fill in the settings",
-    "tracker": "Tracking"
+    "tracker": "Tracking",
+    "selectAll": "Select All"
   },
   "video": {
     "episodes": "Episodes",

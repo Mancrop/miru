@@ -429,17 +429,22 @@ class DetailPageController extends GetxController {
     );
   }
 
-  changeDownloadSelectorState() {
-    if (isDownloadSelectorState.value) {
-      final episodes = detail!.episodes![selectEpGroup.value].urls;
-      OfflineResourceService.startMangaDownloadJob(
-          package,
-          url,
-          detail!,
-          selectEpGroup.value,
-          List.generate(episodes.length, (index) => index));
-    }
-    isDownloadSelectorState.value = !isDownloadSelectorState.value;
+  // changeDownloadSelectorState() {
+  //   if (isDownloadSelectorState.value) {
+  //     final episodes = detail!.episodes![selectEpGroup.value].urls;
+  //     OfflineResourceService.startMangaDownloadJob(
+  //         package,
+  //         url,
+  //         detail!,
+  //         selectEpGroup.value,
+  //         List.generate(episodes.length, (index) => index));
+  //   }
+  //   isDownloadSelectorState.value = !isDownloadSelectorState.value;
+  // }
+
+  download(List<int> selected) {
+    OfflineResourceService.startMangaDownloadJob(
+        package, url, detail!, selectEpGroup.value, selected);
   }
 
   @override

@@ -2,7 +2,9 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
+import 'package:miru_app/router/router.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/views/dialogs/download_picker_dialog.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DetailDownloadButton extends StatefulWidget {
@@ -21,57 +23,29 @@ class _DetailDownloadButtonState extends State<DetailDownloadButton> {
   late DetailPageController c = Get.find<DetailPageController>(tag: widget.tag);
 
   Widget _buildAndroid(BuildContext context) {
-    return Obx(() {
-      final isDownloadSelectorState = c.isDownloadSelectorState.value;
-      if (!isDownloadSelectorState) {
-        return IconButton(
-          onPressed: () {
-            c.changeDownloadSelectorState();
-          },
-          icon: const Icon(fluent.FluentIcons.download),
-        );
-      } else {
-        return IconButton(
-          onPressed: () {
-            c.changeDownloadSelectorState();
-          },
-          icon: const Icon(fluent.FluentIcons.check_mark),
-        );
-      }
-    });
+    return IconButton(
+      onPressed: () {
+        
+      },
+      icon: const Icon(fluent.FluentIcons.download),
+    );
   }
 
   Widget _buildDesktop(BuildContext context) {
-    return Obx(() {
-      final isDownloadSelectorState = c.isDownloadSelectorState.value;
-      if (!isDownloadSelectorState) {
-        return fluent.FilledButton(
-          onPressed: () {
-            c.changeDownloadSelectorState();
-          },
-          child: Row(
-            children: [
-              const Icon(fluent.FluentIcons.download),
-              const SizedBox(width: 10),
-              Text('detail.download'.i18n),
-            ],
-          ),
-        );
-      } else {
-        return fluent.FilledButton(
-          onPressed: () {
-            c.changeDownloadSelectorState();
-          },
-          child: Row(
-            children: [
-              const Icon(fluent.FluentIcons.check_mark),
-              const SizedBox(width: 10),
-              Text('detail.confirm'.i18n),
-            ],
-          ),
-        );
-      }
-    });
+    return fluent.FilledButton(
+      onPressed: () {
+        fluent.showDialog(
+            context: currentContext,
+            builder: (context) => DownloadPickerDialog(tag: widget.tag));
+      },
+      child: Row(
+        children: [
+          const Icon(fluent.FluentIcons.download),
+          const SizedBox(width: 10),
+          Text('detail.download'.i18n),
+        ],
+      ),
+    );
   }
 
   @override
