@@ -435,6 +435,15 @@ class _SettingsPageState extends State<SettingsPage> {
         content: Column(
           children: [
             SettingsTile(
+              isCard: true,
+                title: 'settings.download-manager'.i18n,
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  if (!Platform.isAndroid) {
+                    router.push('/settings/download/download_manager');
+                  }
+                }),
+            SettingsTile(
                 title: 'settings.download-path'.i18n,
                 buildSubtitle: () => 'settings.download-path-subtitle'.i18n,
                 trailing: PlatformWidget(
