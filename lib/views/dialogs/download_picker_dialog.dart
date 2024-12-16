@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DownloadPickerDialog extends StatefulWidget {
@@ -23,13 +24,12 @@ class _DownloadPickerDialogState extends State<DownloadPickerDialog> {
   late DetailPageController c = Get.find<DetailPageController>(tag: widget.tag);
   List<fluent.ComboBoxItem<int>>? comboBoxItems;
   late List<ExtensionEpisodeGroup> episodes = [];
-  late List<bool> isSelected =
-      List.filled(episodes[c.selectEpGroup.value].urls.length, false);
+  late List<List<bool>> isSelected = c.isSelected;
   bool isSelectAll = false;
 
   Widget _buildDesktop(BuildContext context) {
     return Obx(() {
-      final _data = c.aniListID.value;
+      final _ = c.aniListID.value;
       return fluent.ContentDialog(
           constraints: const BoxConstraints(maxWidth: 2600),
           content: fluent.LayoutBuilder(builder: (context, constraints) {
@@ -79,11 +79,11 @@ class _DownloadPickerDialogState extends State<DownloadPickerDialog> {
                           ? 0
                           : episodes[c.selectEpGroup.value].urls.length,
                       itemBuilder: (context, index) {
-                        if (isSelected[index]) {
+                        if (isSelected[c.selectEpGroup.value][index]) {
                           return fluent.FilledButton(
                             onPressed: () {
                               setState(() {
-                                isSelected[index] = !isSelected[index];
+                                isSelected[c.selectEpGroup.value][index] = !isSelected[c.selectEpGroup.value][index];
                               });
                             },
                             child: Center(
@@ -96,7 +96,7 @@ class _DownloadPickerDialogState extends State<DownloadPickerDialog> {
                         return fluent.Button(
                           onPressed: () {
                             setState(() {
-                              isSelected[index] = !isSelected[index];
+                              isSelected[c.selectEpGroup.value][index] = !isSelected[c.selectEpGroup.value][index];
                             });
                           },
                           child: Center(
@@ -120,7 +120,7 @@ class _DownloadPickerDialogState extends State<DownloadPickerDialog> {
                               onChanged: (value) {
                                 setState(() {
                                   isSelectAll = !isSelectAll;
-                                  isSelected = List.filled(
+                                  isSelected[c.selectEpGroup.value] = List.filled(
                                       episodes[c.selectEpGroup.value]
                                           .urls
                                           .length,
@@ -142,16 +142,19 @@ class _DownloadPickerDialogState extends State<DownloadPickerDialog> {
                               items: comboBoxItems,
                               value: c.selectEpGroup.value,
                               onChanged: (value) {
-                                c.selectEpGroup.value = value!;
+                                setState(() {
+                                  c.selectEpGroup.value = value!;
+                                });
                               }),
                           const SizedBox(width: 8),
                           fluent.Button(
                               child: Text('detail.download'.i18n),
                               onPressed: () {
                                 final toDownload = <int>[];
-                                for (var i = 0; i < isSelected.length; i++) {
-                                  if (isSelected[i]) {
+                                for (var i = 0; i < isSelected[c.selectEpGroup.value].length; i++) {
+                                  if (isSelected[c.selectEpGroup.value][i]) {
                                     toDownload.add(i);
+                                    isSelected[c.selectEpGroup.value][i] = false;
                                   }
                                 }
                                 c.download(toDownload);

@@ -152,7 +152,7 @@
     "download": "Download",
     "download-subtitle": "Download Manager settings",
     "download-path": "Download Path",
-    "download-path-subtitle": "Select the download path",
+    "download-path-subtitle": "Select the download path, to avoid permission issues, please select allow all the time",
     "download-path-select": "Select",
     "download-max-task": "Max Task",
     "download-max-task-subtitle": "Max download tasks. To avoid network congestion, it is recommended to set a reasonable value"

@@ -48,6 +48,7 @@ class DetailPageController extends GetxController {
   final Rx<TMDBDetail?> tmdb = Rx(null);
   final Rx<ExtensionService?> runtime = Rx(null);
   final RxBool isDownloadSelectorState = false.obs;
+  late List<List<bool>> isSelected;
 
   ExtensionType get type =>
       runtime.value?.extension.type ?? ExtensionType.bangumi;
@@ -152,6 +153,13 @@ class DetailPageController extends GetxController {
       await getDetail();
       await getTMDBDetail();
       await getHistory();
+      isSelected = List.generate(
+        detail!.episodes!.length,
+        (index) => List.generate(
+          detail!.episodes![index].urls.length,
+          (index) => false,
+        ),
+      );
       isLoading.value = false;
     } catch (e) {
       error.value = e.toString();
@@ -173,7 +181,7 @@ class DetailPageController extends GetxController {
 
     dynamic data;
     if (Platform.isAndroid) {
-      data = await Get.to(TMDBBinding(
+      data = await Get.to(() => TMDBBinding(
         title: detail!.title,
       ));
     } else {
@@ -429,18 +437,9 @@ class DetailPageController extends GetxController {
     );
   }
 
-  // changeDownloadSelectorState() {
-  //   if (isDownloadSelectorState.value) {
-  //     final episodes = detail!.episodes![selectEpGroup.value].urls;
-  //     OfflineResourceService.startMangaDownloadJob(
-  //         package,
-  //         url,
-  //         detail!,
-  //         selectEpGroup.value,
-  //         List.generate(episodes.length, (index) => index));
-  //   }
-  //   isDownloadSelectorState.value = !isDownloadSelectorState.value;
-  // }
+  changeDownloadSelectorState() {
+    isDownloadSelectorState.value = !isDownloadSelectorState.value;
+  }
 
   download(List<int> selected) {
     OfflineResourceService.startMangaDownloadJob(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/router/router.dart';
+import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/views/dialogs/download_picker_dialog.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
@@ -21,14 +22,39 @@ class DetailDownloadButton extends StatefulWidget {
 
 class _DetailDownloadButtonState extends State<DetailDownloadButton> {
   late DetailPageController c = Get.find<DetailPageController>(tag: widget.tag);
+  late var isSelected = c.isSelected;
 
   Widget _buildAndroid(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        
-      },
-      icon: const Icon(fluent.FluentIcons.download),
-    );
+    return Obx(() {
+      final isDownloadSelectorState = c.isDownloadSelectorState.value;
+      if (!isDownloadSelectorState) {
+        return IconButton(
+          onPressed: () {
+            c.changeDownloadSelectorState();
+          },
+          icon: const Icon(fluent.FluentIcons.download),
+        );
+      } else {
+        return IconButton(
+          onPressed: () async {
+            c.changeDownloadSelectorState();
+            if (await requestStoragePermissions()) {
+              final toDownload = <int>[];
+              for (var i = 0;
+                  i < isSelected[c.selectEpGroup.value].length;
+                  i++) {
+                if (isSelected[c.selectEpGroup.value][i]) {
+                  toDownload.add(i);
+                  isSelected[c.selectEpGroup.value][i] = false;
+                }
+              }
+              c.download(toDownload);
+            }
+          },
+          icon: const Icon(fluent.FluentIcons.check_mark),
+        );
+      }
+    });
   }
 
   Widget _buildDesktop(BuildContext context) {

@@ -29,6 +29,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as p;
+import 'package:miru_app/utils/android_permission.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -438,13 +439,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 buildSubtitle: () => 'settings.download-path-subtitle'.i18n,
                 trailing: PlatformWidget(
                   androidWidget: TextButton(
-                    // Todo： 完成安卓组件的编写
                     onPressed: () async {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {
-                        String newPath = p.join(path, 'Miru');
-                        MiruStorage.setSetting(
-                            SettingKey.downloadPath, newPath);
+                        if (await requestStoragePermissions()) {
+                          String newPath = p.join(path, 'Miru');
+                          MiruStorage.setSetting(
+                              SettingKey.downloadPath, newPath);
+                        }
                       }
                     },
                     child: Text('settings.download-path-select'.i18n),

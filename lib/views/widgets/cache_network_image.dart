@@ -74,7 +74,7 @@ class CacheNetWorkImagePic extends StatelessWidget {
               headers: headers,
             );
             if (Platform.isAndroid) {
-              Get.to(thumnailPage);
+              Get.to(() => thumnailPage);
               return;
             }
             fluent.showDialog(

@@ -29,7 +29,7 @@ class _DetailEpisodesState extends State<DetailEpisodes> {
   late List<ExtensionEpisodeGroup> episodes = [];
   late String listMode = MiruStorage.getSetting(SettingKey.listMode);
   bool isRevered = false;
-  List<bool> isSelected = List.filled(100, false);
+  late List<List<bool>> isSelected = c.isSelected;
 
   Widget _buildAndroidEpisodes(BuildContext context) {
     return Obx(() {
@@ -149,20 +149,22 @@ class _DetailEpisodesState extends State<DetailEpisodes> {
                                 .urls[index]
                                 .name),
                         value: isRevered
-                            ? isSelected[
+                            ? isSelected[c.selectEpGroup.value][
                                 episodes[c.selectEpGroup.value].urls.length -
                                     1 -
                                     index]
-                            : isSelected[index],
+                            : isSelected[c.selectEpGroup.value][index],
                         onChanged: (bool? value) {
                           setState(() {
                             isRevered
-                                ? isSelected[episodes[c.selectEpGroup.value]
-                                        .urls
-                                        .length -
-                                    1 -
-                                    index] = value!
-                                : isSelected[index] = value!;
+                                ? isSelected[c.selectEpGroup.value][
+                                    episodes[c.selectEpGroup.value]
+                                            .urls
+                                            .length -
+                                        1 -
+                                        index] = value!
+                                : isSelected[c.selectEpGroup.value][index] =
+                                    value!;
                           });
                         },
                       );
@@ -253,10 +255,10 @@ class _DetailEpisodesState extends State<DetailEpisodes> {
                 title: fluent.Row(
                   children: [
                     fluent.Checkbox(
-                      checked: isSelected[index],
+                      checked: isSelected[c.selectEpGroup.value][index],
                       onChanged: (value) {
                         setState(() {
-                          isSelected[index] = value!;
+                          isSelected[c.selectEpGroup.value][index] = value!;
                         });
                       },
                     ),
