@@ -13,6 +13,7 @@ import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/views/dialogs/bt_dialog.dart';
 import 'package:miru_app/controllers/extension/extension_repo_controller.dart';
 import 'package:miru_app/controllers/settings_controller.dart';
+import 'package:miru_app/views/pages/download_manager_page.dart';
 import 'package:miru_app/views/pages/tracking/anilist_tracking_page.dart';
 import 'package:miru_app/views/widgets/settings/settings_expander_tile.dart';
 import 'package:miru_app/views/widgets/settings/settings_input_tile.dart';
@@ -441,6 +442,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 onTap: () {
                   if (!Platform.isAndroid) {
                     router.push('/settings/download/download_manager');
+                  } else {
+                    Get.to(() => const DownloadManagerPage());
                   }
                 }),
             SettingsTile(
