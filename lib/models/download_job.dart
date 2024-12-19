@@ -30,8 +30,28 @@ extension DownloadStatusExtension on DownloadStatus {
     }
   }
 
+  bool get isQueued {
+    return this == DownloadStatus.queued;
+  }
+
+  bool get isDownloading {
+    return this == DownloadStatus.downloading;
+  }
+
   bool get isComplete {
     return this == DownloadStatus.completed;
+  }
+
+  bool get isFailed {
+    return this == DownloadStatus.failed;
+  }
+
+  bool get isPaused {
+    return this == DownloadStatus.paused;
+  }
+
+  bool get isCanceled {
+    return this == DownloadStatus.canceled;
   }
 }
 

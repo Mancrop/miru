@@ -27,33 +27,23 @@ const MiruDetailSchema = CollectionSchema(
       name: r'data',
       type: IsarType.string,
     ),
-    r'downloadList': PropertySchema(
-      id: 2,
-      name: r'downloadList',
-      type: IsarType.stringList,
-    ),
-    r'downloadPath': PropertySchema(
-      id: 3,
-      name: r'downloadPath',
-      type: IsarType.string,
-    ),
     r'package': PropertySchema(
-      id: 4,
+      id: 2,
       name: r'package',
       type: IsarType.string,
     ),
     r'tmdbID': PropertySchema(
-      id: 5,
+      id: 3,
       name: r'tmdbID',
       type: IsarType.long,
     ),
     r'updateTime': PropertySchema(
-      id: 6,
+      id: 4,
       name: r'updateTime',
       type: IsarType.dateTime,
     ),
     r'url': PropertySchema(
-      id: 7,
+      id: 5,
       name: r'url',
       type: IsarType.string,
     )
@@ -104,24 +94,6 @@ int _miruDetailEstimateSize(
     }
   }
   bytesCount += 3 + object.data.length * 3;
-  {
-    final list = object.downloadList;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += value.length * 3;
-        }
-      }
-    }
-  }
-  {
-    final value = object.downloadPath;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.package.length * 3;
   bytesCount += 3 + object.url.length * 3;
   return bytesCount;
@@ -135,12 +107,10 @@ void _miruDetailSerialize(
 ) {
   writer.writeString(offsets[0], object.aniListID);
   writer.writeString(offsets[1], object.data);
-  writer.writeStringList(offsets[2], object.downloadList);
-  writer.writeString(offsets[3], object.downloadPath);
-  writer.writeString(offsets[4], object.package);
-  writer.writeLong(offsets[5], object.tmdbID);
-  writer.writeDateTime(offsets[6], object.updateTime);
-  writer.writeString(offsets[7], object.url);
+  writer.writeString(offsets[2], object.package);
+  writer.writeLong(offsets[3], object.tmdbID);
+  writer.writeDateTime(offsets[4], object.updateTime);
+  writer.writeString(offsets[5], object.url);
 }
 
 MiruDetail _miruDetailDeserialize(
@@ -152,13 +122,11 @@ MiruDetail _miruDetailDeserialize(
   final object = MiruDetail();
   object.aniListID = reader.readStringOrNull(offsets[0]);
   object.data = reader.readString(offsets[1]);
-  object.downloadList = reader.readStringList(offsets[2]);
-  object.downloadPath = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.package = reader.readString(offsets[4]);
-  object.tmdbID = reader.readLongOrNull(offsets[5]);
-  object.updateTime = reader.readDateTime(offsets[6]);
-  object.url = reader.readString(offsets[7]);
+  object.package = reader.readString(offsets[2]);
+  object.tmdbID = reader.readLongOrNull(offsets[3]);
+  object.updateTime = reader.readDateTime(offsets[4]);
+  object.url = reader.readString(offsets[5]);
   return object;
 }
 
@@ -174,16 +142,12 @@ P _miruDetailDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readStringList(offset)) as P;
-    case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 3:
       return (reader.readLongOrNull(offset)) as P;
-    case 6:
+    case 4:
       return (reader.readDateTime(offset)) as P;
-    case 7:
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -648,403 +612,6 @@ extension MiruDetailQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'data',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'downloadList',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'downloadList',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'downloadList',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'downloadList',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'downloadList',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'downloadList',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'downloadList',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadListLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'downloadList',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'downloadPath',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'downloadPath',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'downloadPath',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'downloadPath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'downloadPath',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'downloadPath',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterFilterCondition>
-      downloadPathIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'downloadPath',
         value: '',
       ));
     });
@@ -1523,18 +1090,6 @@ extension MiruDetailQuerySortBy
     });
   }
 
-  QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> sortByDownloadPath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'downloadPath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> sortByDownloadPathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'downloadPath', Sort.desc);
-    });
-  }
-
   QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> sortByPackage() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'package', Sort.asc);
@@ -1607,18 +1162,6 @@ extension MiruDetailQuerySortThenBy
   QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> thenByDataDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'data', Sort.desc);
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> thenByDownloadPath() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'downloadPath', Sort.asc);
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QAfterSortBy> thenByDownloadPathDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'downloadPath', Sort.desc);
     });
   }
 
@@ -1699,19 +1242,6 @@ extension MiruDetailQueryWhereDistinct
     });
   }
 
-  QueryBuilder<MiruDetail, MiruDetail, QDistinct> distinctByDownloadList() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'downloadList');
-    });
-  }
-
-  QueryBuilder<MiruDetail, MiruDetail, QDistinct> distinctByDownloadPath(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'downloadPath', caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<MiruDetail, MiruDetail, QDistinct> distinctByPackage(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1756,19 +1286,6 @@ extension MiruDetailQueryProperty
   QueryBuilder<MiruDetail, String, QQueryOperations> dataProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'data');
-    });
-  }
-
-  QueryBuilder<MiruDetail, List<String>?, QQueryOperations>
-      downloadListProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'downloadList');
-    });
-  }
-
-  QueryBuilder<MiruDetail, String?, QQueryOperations> downloadPathProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'downloadPath');
     });
   }
 

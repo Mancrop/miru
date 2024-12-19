@@ -495,10 +495,10 @@ class _SettingsPageState extends State<SettingsPage> {
               title: 'settings.download-max-task'.i18n,
               buildSubtitle: () => 'settings.download-max-task-subtitle'.i18n,
               onChanged: (value) {
-                MiruStorage.setSetting(SettingKey.downloadMaxTask, value);
+                MiruStorage.setSetting(SettingKey.downloadMaxTasks, value);
               },
               buildText: () {
-                return MiruStorage.getSetting(SettingKey.downloadMaxTask)
+                return MiruStorage.getSetting(SettingKey.downloadMaxTasks)
                     .toString();
               },
             ),

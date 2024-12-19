@@ -124,6 +124,11 @@ class DatabaseService {
         () => db.offlineResources.putByIndex(r'path', offlineResource));
   }
 
+  // 获取资源
+  static Future<OfflineResource?> getOfflineResourceByPath(String path) async {
+    return db.offlineResources.filter().pathEqualTo(path).findFirst();
+  }
+
   // 删除资源
   static Future<void> deleteOfflineResourceByPath(String path) async {
     return db.writeTxn(

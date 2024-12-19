@@ -9,6 +9,8 @@ abstract class DownloadInterface {
 
   double get progress;
 
+  int get id;
+
   DownloaderType getDownloaderType();
 
   DownloadStatus get status;

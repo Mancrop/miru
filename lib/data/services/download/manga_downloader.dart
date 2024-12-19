@@ -12,6 +12,7 @@ import 'package:miru_app/utils/request.dart';
 import 'package:path/path.dart' as p;
 
 class MangaDownloader extends DownloadInterface {
+  late int _id;
   final gDio = dio;
   var _progress = 0.0;
   var _status = DownloadStatus.queued;
@@ -19,11 +20,15 @@ class MangaDownloader extends DownloadInterface {
   late String _url;
   late DownloadJob _job;
 
-  MangaDownloader(DownloadJob job) {
+  MangaDownloader(DownloadJob job, int id) {
     _job = job;
     _name = job.resource.value!.title;
     _url = job.resource.value!.url!;
+    _id = id;
   }
+
+  @override
+  int get id => _id;
 
   @override
   DownloadStatus get status => _status;

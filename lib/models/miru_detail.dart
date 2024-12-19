@@ -12,6 +12,4 @@ class MiruDetail {
   int? tmdbID;
   DateTime updateTime = DateTime.now();
   String? aniListID;
-  String? downloadPath;
-  List<String>? downloadList;
 }
