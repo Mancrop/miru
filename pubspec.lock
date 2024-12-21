@@ -422,14 +422,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2"
-  flutter_download_manager:
-    dependency: "direct main"
-    description:
-      name: flutter_download_manager
-      sha256: f0e604be623f2559a2dc2ccb0918e4e5224ff28a02b864ba0c27a3c6aca6c154
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.5"
   flutter_foreground_task:
     dependency: "direct main"
     description:

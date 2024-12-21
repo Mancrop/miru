@@ -65,7 +65,6 @@ dependencies:
   dlna_dart: ^0.0.8
   re_editor: ^0.6.0
   re_highlight: ^0.0.3
-  flutter_download_manager: ^0.5.5
   permission_handler: ^10.0.0
   flutter_foreground_task: ^8.17.0
 
