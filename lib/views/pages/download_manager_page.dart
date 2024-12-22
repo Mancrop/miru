@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:miru_app/data/services/download/download_manager.dart';
+import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class DownloadManagerPage extends StatefulWidget {
@@ -12,65 +14,64 @@ class DownloadManagerPage extends StatefulWidget {
   State<DownloadManagerPage> createState() => _DownloadManagerPageState();
 }
 
-class Task {
-  String name;
-  bool isPaused;
-  bool isExpanded;
-
-
-  Task({
-    required this.name,
-    this.isPaused = false,
-    this.isExpanded = false,
-  });
-}
+typedef Task = TaskInternal;
 
 class _DownloadManagerPageState extends State<DownloadManagerPage> {
-  List<Task> _tasks = []; // 任务列表
+  List<Task> _downloading = []; // 任务列表
+  List<Task> _queue = []; // 等待队列
+  List<Task> _others = []; // 其他任务
   final Set<Task> _selectedTasks = {}; // 选中的任务
+  // ignore: unused_field
+  late Timer _timer;
+  final downloadManager = DownloadManager();
 
   @override
   void initState() {
     super.initState();
-    _tasks = [
-      Task(name: '任务1'),
-      Task(name: '任务2'),
-      Task(name: '任务3'),
-    ];
+    _timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+      setState(() {
+        // 更新任务状态
+        _downloading = downloadManager.downloading;
+        _queue = downloadManager.queue;
+        _others = downloadManager.others;
+      });
+    });
   }
 
-  bool get _isAnySelected => _selectedTasks.isNotEmpty;
-
-Widget _buildAndroid(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Download Manager'),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.play_arrow),
-          onPressed: _isAnySelected ? _resumeSelectedTasks : null,
-        ),
-        IconButton(
-          icon: Icon(Icons.pause),
-          onPressed: _isAnySelected ? _pauseSelectedTasks : null,
-        ),
-        IconButton(
-          icon: Icon(Icons.cancel),
-          onPressed: _isAnySelected ? _cancelSelectedTasks : null,
-        ),
-      ],
-    ),
-    body: ListView.builder(
-      itemCount: _tasks.length,
-      itemBuilder: (context, index) {
-        final task = _tasks[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              ListTile(
-                leading: Checkbox(
-                  value: _selectedTasks.contains(task),
+  Widget listUtils(List<Task> listToDisplay) {
+    return Expanded(
+      child: Center(
+        child: ListView.builder(
+          itemCount: listToDisplay.length,
+          itemBuilder: (context, index) {
+            final task = listToDisplay[index];
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                color: fluent.FluentTheme.of(context).micaBackgroundColor,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: fluent.ListTile.selectable(
+                tileColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.isHovered || states.isFocused) {
+                    return fluent.FluentTheme.of(context)
+                        .accentColor
+                        .withOpacity(1);
+                  }
+                  return fluent.FluentTheme.of(context).micaBackgroundColor;
+                }),
+                selected: _selectedTasks.contains(task),
+                onSelectionChange: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _selectedTasks.add(task);
+                    } else {
+                      _selectedTasks.remove(task);
+                    }
+                  });
+                },
+                leading: fluent.Checkbox(
+                  checked: _selectedTasks.contains(task),
                   onChanged: (value) {
                     setState(() {
                       if (value!) {
@@ -81,47 +82,159 @@ Widget _buildAndroid(BuildContext context) {
                     });
                   },
                 ),
-                title: Text(task.name),
+                title: Row(
+                  children: [
+                    Text(task.name),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: fluent.ProgressBar(
+                        value: task.progress * 100,
+                        backgroundColor: Colors.grey[200],
+                        strokeWidth: 6,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.cancel),
+                        icon: Icon(fluent.FluentIcons.cancel),
+                        onPressed: () {
+                          setState(() {
+                            task.cancel();
+                            listToDisplay.remove(task);
+                          });
+                        }),
+                    IconButton(
+                      icon: Icon(task.status.isPaused
+                          ? fluent.FluentIcons.play
+                          : fluent.FluentIcons.pause),
                       onPressed: () {
                         setState(() {
-                          _tasks.remove(task);
+                          if (task.status.isPaused) {
+                            task.resume();
+                          } else {
+                            task.pause();
+                          }
                         });
                       },
                     ),
                     IconButton(
-                      icon: Icon(task.isPaused ? Icons.play_arrow : Icons.pause),
+                      icon: Icon(task.isExpanded
+                          ? fluent.FluentIcons.chevron_up
+                          : fluent.FluentIcons.chevron_down),
                       onPressed: () {
                         setState(() {
-                          task.isPaused = !task.isPaused;
+                          task.isExpanded = !task.isExpanded;
                         });
                       },
                     ),
                   ],
                 ),
+                subtitle: task.isExpanded
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          const Text('任务详情...'),
+                          const SizedBox(height: 8),
+                        ],
+                      )
+                    : null,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: LinearProgressIndicator(
-                  value: 0.5,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('Details of ${task.name}...'),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+            );
+          },
+        ),
+      ),
+    );
+  }
 
+  bool get _isAnySelected => _selectedTasks.isNotEmpty;
+
+  Widget _buildAndroid(BuildContext context) {
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text('Download Manager'),
+    //     actions: [
+    //       IconButton(
+    //         icon: Icon(Icons.play_arrow),
+    //         onPressed: _isAnySelected ? _resumeSelectedTasks : null,
+    //       ),
+    //       IconButton(
+    //         icon: Icon(Icons.pause),
+    //         onPressed: _isAnySelected ? _pauseSelectedTasks : null,
+    //       ),
+    //       IconButton(
+    //         icon: Icon(Icons.cancel),
+    //         onPressed: _isAnySelected ? _cancelSelectedTasks : null,
+    //       ),
+    //     ],
+    //   ),
+    //   body: ListView.builder(
+    //     itemCount: _tasks.length,
+    //     itemBuilder: (context, index) {
+    //       final task = _tasks[index];
+    //       return Card(
+    //         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    //         child: Column(
+    //           children: [
+    //             ListTile(
+    //               leading: Checkbox(
+    //                 value: _selectedTasks.contains(task),
+    //                 onChanged: (value) {
+    //                   setState(() {
+    //                     if (value!) {
+    //                       _selectedTasks.add(task);
+    //                     } else {
+    //                       _selectedTasks.remove(task);
+    //                     }
+    //                   });
+    //                 },
+    //               ),
+    //               title: Text(task.name),
+    //               trailing: Row(
+    //                 mainAxisSize: MainAxisSize.min,
+    //                 children: [
+    //                   IconButton(
+    //                     icon: Icon(Icons.cancel),
+    //                     onPressed: () {
+    //                       setState(() {
+    //                         _tasks.remove(task);
+    //                       });
+    //                     },
+    //                   ),
+    //                   IconButton(
+    //                     icon: Icon(
+    //                         task.isPaused ? Icons.play_arrow : Icons.pause),
+    //                     onPressed: () {
+    //                       setState(() {
+    //                         task.isPaused = !task.isPaused;
+    //                       });
+    //                     },
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+    //             Padding(
+    //               padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    //               child: LinearProgressIndicator(
+    //                 value: 0.5,
+    //               ),
+    //             ),
+    //             Padding(
+    //               padding: const EdgeInsets.all(16.0),
+    //               child: Text('Details of ${task.name}...'),
+    //             ),
+    //           ],
+    //         ),
+    //       );
+    //     },
+    //   ),
+    // );
+    return const Text("Todo: Android Download Manager");
+  }
 
   Widget _buildDesktop(BuildContext context) {
     return LayoutBuilder(
@@ -182,121 +295,26 @@ Widget _buildAndroid(BuildContext context) {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: Center(
-                            child: ListView.builder(
-                              itemCount: _tasks.length,
-                              itemBuilder: (context, index) {
-                                final task = _tasks[index];
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: fluent.FluentTheme.of(context)
-                                        .micaBackgroundColor,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: fluent.ListTile.selectable(
-                                    tileColor: WidgetStateProperty.resolveWith(
-                                        (states) {
-                                      if (states.isHovered ||
-                                          states.isFocused) {
-                                        return fluent.FluentTheme.of(context)
-                                            .accentColor
-                                            .withOpacity(1);
-                                      }
-                                      return fluent.FluentTheme.of(context)
-                                          .micaBackgroundColor;
-                                    }),
-                                    selected: _selectedTasks.contains(task),
-                                    onSelectionChange: (selected) {
-                                      setState(() {
-                                        if (selected) {
-                                          _selectedTasks.add(task);
-                                        } else {
-                                          _selectedTasks.remove(task);
-                                        }
-                                      });
-                                    },
-                                    leading: fluent.Checkbox(
-                                      checked: _selectedTasks.contains(task),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          if (value!) {
-                                            _selectedTasks.add(task);
-                                          } else {
-                                            _selectedTasks.remove(task);
-                                          }
-                                        });
-                                      },
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Text(task.name),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: fluent.ProgressBar(
-                                            value: 50,
-                                            backgroundColor: Colors.grey[200],
-                                            strokeWidth: 6,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                      ],
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                            icon:
-                                                Icon(fluent.FluentIcons.cancel),
-                                            onPressed: () {
-                                              setState(() {
-                                                _tasks.remove(task);
-                                              });
-                                            }),
-                                        IconButton(
-                                          icon: Icon(task.isPaused
-                                              ? fluent.FluentIcons.play
-                                              : fluent.FluentIcons.pause),
-                                          onPressed: () {
-                                            setState(() {
-                                              task.isPaused = !task.isPaused;
-                                            });
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: Icon(task.isExpanded
-                                              ? fluent.FluentIcons.chevron_up
-                                              : fluent
-                                                  .FluentIcons.chevron_down),
-                                          onPressed: () {
-                                            setState(() {
-                                              task.isExpanded =
-                                                  !task.isExpanded;
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    subtitle: task.isExpanded
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const SizedBox(height: 8),
-                                              const Text('任务详情...'),
-                                              const SizedBox(height: 8),
-                                            ],
-                                          )
-                                        : null,
-                                  ),
-                                );
-                              },
-                            ),
+                        const SizedBox(height: 32),
+                        listUtils(_downloading),
+                        if (_queue.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Divider(
+                            color: Colors.grey.withOpacity(0.3), // 更淡的分割线
+                            thickness: 1,
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          listUtils(_queue),
+                        ],
+                        if (_others.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Divider(
+                            color: Colors.grey.withOpacity(0.3), // 更淡的分割线
+                            thickness: 1,
+                          ),
+                          const SizedBox(height: 8),
+                          listUtils(_others),
+                        ],
                       ],
                     ),
                   ),
@@ -325,5 +343,11 @@ Widget _buildAndroid(BuildContext context) {
       androidBuilder: _buildAndroid,
       desktopBuilder: _buildDesktop,
     );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 }

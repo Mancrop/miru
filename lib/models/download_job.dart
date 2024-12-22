@@ -1,5 +1,4 @@
 import 'package:isar/isar.dart';
-import 'package:miru_app/models/offline_resource.dart';
 
 part 'download_job.g.dart';
 
@@ -55,12 +54,71 @@ extension DownloadStatusExtension on DownloadStatus {
   }
 }
 
+enum ResourceType {
+  video,
+  manga,
+  novel,
+}
+
+enum ResourceSource {
+  userImport,
+  // bitorrentDownload,
+  fromExtension,
+}
+
+
+@embedded
+class Item {
+  late String title;
+  late String subPath;
+  late String url;
+}
+
+@embedded
+class Ep {
+  late String title;
+  late List<Item> items;
+  late String subPath;
+}
+
+
+@embedded
+class OfflineResource {
+  bool virtualResource = true;
+  @Enumerated(EnumType.name)
+  late ResourceSource source;
+
+  @Enumerated(EnumType.name)
+  late ResourceType type;
+
+  late String? package;
+  late String? url;
+  late String title;
+  late String? cover;
+  late String path;
+
+  late List<Ep> eps;
+}
+
 @Collection()
 class DownloadJob {
   Id id = Isar.autoIncrement;
   @Enumerated(EnumType.name)
-  late DownloadStatus status;
+  DownloadStatus status = DownloadStatus.queued;
 
-  final resource = IsarLink<OfflineResource>();
-  late int progress;
+  @Index(name: 'jobId', unique: true)
+  late int jobId;
+
+  late OfflineResource? resource;
+
+  DownloadJob({required this.jobId, OfflineResource? resource}) {
+    assert(resource != null, 'Resource cannot be null');
+    if (resource != null) {
+      this.resource = resource;
+    }
+  }
+
+  void setResourceToNull() {
+    resource = null;
+  }
 }

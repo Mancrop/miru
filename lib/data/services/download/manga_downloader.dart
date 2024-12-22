@@ -1,19 +1,19 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
 import 'package:miru_app/data/services/extension_service.dart';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/extension.dart';
-import 'package:miru_app/models/offline_resource.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/image_type.dart';
-import 'package:miru_app/utils/request.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:path/path.dart' as p;
 
 class MangaDownloader extends DownloadInterface {
   late int _id;
-  final gDio = dio;
   var _progress = 0.0;
   var _status = DownloadStatus.queued;
   late String _name;
@@ -22,13 +22,22 @@ class MangaDownloader extends DownloadInterface {
 
   MangaDownloader(DownloadJob job, int id) {
     _job = job;
-    _name = job.resource.value!.title;
-    _url = job.resource.value!.url!;
+    _name = job.resource!.title;
+    _url = job.resource!.url!;
     _id = id;
+  }
+
+  bool deadStatus() {
+    return _status == DownloadStatus.canceled ||
+        _status == DownloadStatus.failed ||
+        _status == DownloadStatus.completed;
   }
 
   @override
   int get id => _id;
+
+  @override
+  String? get detail => null;
 
   @override
   DownloadStatus get status => _status;
@@ -41,11 +50,11 @@ class MangaDownloader extends DownloadInterface {
     return DownloaderType.mangaDownloader;
   }
 
-  Future<void> pauseInternal() async {
-    while (status == DownloadStatus.paused || status == DownloadStatus.queued) {
-      await Future.delayed(Duration(seconds: 1));
-    }
-  }
+  // Future<void> pauseInternal() async {
+  //   while (status == DownloadStatus.paused || status == DownloadStatus.queued) {
+  //     await Future.delayed(Duration(seconds: 1));
+  //   }
+  // }
 
   Future<DownloadStatus> downloadInternal(
       int total, ExtensionService runtime, OfflineResource resource) async {
@@ -55,21 +64,35 @@ class MangaDownloader extends DownloadInterface {
         if (_status == DownloadStatus.canceled) {
           return DownloadStatus.canceled;
         }
-        pauseInternal();
+        while (status == DownloadStatus.paused ||
+            status == DownloadStatus.queued) {
+          await Future.delayed(Duration(seconds: 1));
+        }
         _progress = count / total;
         final path = p.join(resource.path, eps.subPath, item.subPath);
-        if (Directory(path).existsSync()) {
-          count++;
-          continue;
-        }
         final watchData = await runtime.watch(item.url) as ExtensionMangaWatch;
         Directory(path).createSync(recursive: true);
+
+        // 获取目录中的所有文件
+        final existingFiles =
+            Directory(path).listSync().whereType<File>().toList();
+
         for (var (idx, pageUrl) in watchData.urls.indexed) {
           if (_status == DownloadStatus.canceled) {
             return DownloadStatus.canceled;
           }
-          pauseInternal();
-          final res = await gDio.get(pageUrl,
+          while (status == DownloadStatus.paused ||
+              status == DownloadStatus.queued) {
+            await Future.delayed(Duration(seconds: 1));
+          }
+          final File? existingFile = existingFiles.firstWhereOrNull(
+            (file) => p.basenameWithoutExtension(file.path) == '$idx',
+          );
+
+          if (existingFile != null) {
+            continue;
+          }
+          final res = await Dio().get(pageUrl,
               options: Options(
                   responseType: ResponseType.bytes,
                   headers: watchData.headers));
@@ -87,8 +110,7 @@ class MangaDownloader extends DownloadInterface {
   @override
   Future<DownloadStatus> download() async {
     try {
-      await _job.resource.load();
-      var resource = _job.resource.value!;
+      var resource = _job.resource!;
 
       var total = 0;
       for (var ep in resource.eps) {
@@ -99,6 +121,7 @@ class MangaDownloader extends DownloadInterface {
         return DownloadStatus.failed;
       }
       _status = DownloadStatus.downloading;
+      logger.info('Start download $total items');
       final runtime = ExtensionUtils.runtimes[resource.package]!;
       // 如果在下载的过程中，新的同章节请求过来了，怎么办呢？
       // 此时需要下载管理器重新发送一个新的请求
@@ -112,17 +135,34 @@ class MangaDownloader extends DownloadInterface {
 
   @override
   Future<void> pause() async {
+    if (deadStatus()) {
+      return;
+    }
     _status = DownloadStatus.paused;
   }
 
   @override
   Future<void> resume() async {
+    if (deadStatus()) {
+      return;
+    }
     _status = DownloadStatus.downloading;
   }
 
   @override
   Future<void> cancel() async {
+    if (deadStatus()) {
+      return;
+    }
     _status = DownloadStatus.canceled;
+  }
+
+  @override
+  DownloadJob get downloadJob => _job;
+
+  @override
+  void releaseResource() {
+    _job.setResourceToNull();
   }
 
   @override
@@ -130,4 +170,22 @@ class MangaDownloader extends DownloadInterface {
 
   @override
   String get url => _url;
+
+  @override
+  bool get isPaused => _status == DownloadStatus.paused;
+
+  @override
+  bool get isDownloading => _status == DownloadStatus.downloading;
+
+  @override
+  bool get isQueued => _status == DownloadStatus.queued;
+
+  @override
+  bool get isComplete => _status == DownloadStatus.completed;
+
+  @override
+  bool get isCanceled => _status == DownloadStatus.canceled;
+
+  @override
+  bool get isFailed => _status == DownloadStatus.failed;
 }

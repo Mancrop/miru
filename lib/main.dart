@@ -9,6 +9,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:miru_app/controllers/application_controller.dart';
+import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_directory.dart';
 import 'package:miru_app/utils/request.dart';
@@ -91,6 +92,9 @@ void main(List<String> args) async {
       );
       SystemChrome.setSystemUIOverlayStyle(style);
     }
+
+    // 初始化下载管理器
+    DownloadManager.init();
 
     runApp(const MainApp());
   }, (error, stack) {

@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:isar/isar.dart';
+import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/index.dart';
-import 'package:miru_app/models/offline_resource.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 
@@ -117,24 +117,22 @@ class DatabaseService {
     return db.writeTxn(() => db.historys.where().deleteAll());
   }
 
-  // 添加资源
-  static Future<Id> putOfflineResourceByPath(
-      OfflineResource offlineResource) async {
-    return db.writeTxn(
-        () => db.offlineResources.putByIndex(r'path', offlineResource));
+  // 获取所有DownloadJob
+  static Future<List<DownloadJob>> getDownloadJobs() async {
+    return db.downloadJobs.where().findAll();
   }
 
-  // 获取资源
-  static Future<OfflineResource?> getOfflineResourceByPath(String path) async {
-    return db.offlineResources.filter().pathEqualTo(path).findFirst();
+  static Future<Id> putDownloadJobsById(int jobId, DownloadJob downloadJob) async {
+    return db.writeTxn(() => db.downloadJobs.putByIndex('jobId', downloadJob));
   }
 
-  // 删除资源
-  static Future<void> deleteOfflineResourceByPath(String path) async {
+  // 删除DownloadJob
+  static Future<void> deleteDownloadJobById(int jobId) async {
     return db.writeTxn(
-      () => db.offlineResources.filter().pathEqualTo(path).deleteAll(),
+      () => db.downloadJobs.filter().jobIdEqualTo(jobId).deleteAll(),
     );
   }
+
 
   // 扩展设置
   // 获取扩展设置

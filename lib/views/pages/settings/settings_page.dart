@@ -436,7 +436,7 @@ class _SettingsPageState extends State<SettingsPage> {
         content: Column(
           children: [
             SettingsTile(
-              isCard: true,
+                isCard: true,
                 title: 'settings.download-manager'.i18n,
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
@@ -491,15 +491,27 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 )),
             const SizedBox(height: 10),
-            SettingsIntpuTile(
+            SettingsRadiosTile(
               title: 'settings.download-max-task'.i18n,
               buildSubtitle: () => 'settings.download-max-task-subtitle'.i18n,
-              onChanged: (value) {
-                MiruStorage.setSetting(SettingKey.downloadMaxTasks, value);
+              itemNameValue: {
+                '1': 1,
+                '2': 2,
+                '3': 3,
+                '4': 4,
+                '5': 5,
+                '6': 6,
+                '7': 7,
+                '8': 8,
+                '9': 9,
+                '10': 10,
               },
-              buildText: () {
-                return MiruStorage.getSetting(SettingKey.downloadMaxTasks)
-                    .toString();
+              applyValue: (value) {
+                MiruStorage.setSetting(
+                    SettingKey.downloadMaxTasks, value);
+              },
+              buildGroupValue: () {
+                return MiruStorage.getSetting(SettingKey.downloadMaxTasks);
               },
             ),
           ],
