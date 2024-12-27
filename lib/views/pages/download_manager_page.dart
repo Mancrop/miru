@@ -1,13 +1,10 @@
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/application_controller.dart';
-import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/utils/i18n.dart';
-import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 
 class BottomBorderButton extends StatelessWidget {
@@ -186,7 +183,8 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const SizedBox(width: 16),
-                        Text('download.download-status.${task.status.status}'.i18n),
+                        Text('download.download-status.${task.status.status}'
+                            .i18n),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -211,86 +209,91 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
   bool get _isAnySelected => _selectedTasks.isNotEmpty;
 
   Widget _buildAndroid(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: Text('Download Manager'),
-    //     actions: [
-    //       IconButton(
-    //         icon: Icon(Icons.play_arrow),
-    //         onPressed: _isAnySelected ? _resumeSelectedTasks : null,
-    //       ),
-    //       IconButton(
-    //         icon: Icon(Icons.pause),
-    //         onPressed: _isAnySelected ? _pauseSelectedTasks : null,
-    //       ),
-    //       IconButton(
-    //         icon: Icon(Icons.cancel),
-    //         onPressed: _isAnySelected ? _cancelSelectedTasks : null,
-    //       ),
-    //     ],
-    //   ),
-    //   body: ListView.builder(
-    //     itemCount: _tasks.length,
-    //     itemBuilder: (context, index) {
-    //       final task = _tasks[index];
-    //       return Card(
-    //         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    //         child: Column(
-    //           children: [
-    //             ListTile(
-    //               leading: Checkbox(
-    //                 value: _selectedTasks.contains(task),
-    //                 onChanged: (value) {
-    //                   setState(() {
-    //                     if (value!) {
-    //                       _selectedTasks.add(task);
-    //                     } else {
-    //                       _selectedTasks.remove(task);
-    //                     }
-    //                   });
-    //                 },
-    //               ),
-    //               title: Text(task.name),
-    //               trailing: Row(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 children: [
-    //                   IconButton(
-    //                     icon: Icon(Icons.cancel),
-    //                     onPressed: () {
-    //                       setState(() {
-    //                         _tasks.remove(task);
-    //                       });
-    //                     },
-    //                   ),
-    //                   IconButton(
-    //                     icon: Icon(
-    //                         task.isPaused ? Icons.play_arrow : Icons.pause),
-    //                     onPressed: () {
-    //                       setState(() {
-    //                         task.isPaused = !task.isPaused;
-    //                       });
-    //                     },
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //             Padding(
-    //               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    //               child: LinearProgressIndicator(
-    //                 value: 0.5,
-    //               ),
-    //             ),
-    //             Padding(
-    //               padding: const EdgeInsets.all(16.0),
-    //               child: Text('Details of ${task.name}...'),
-    //             ),
-    //           ],
-    //         ),
-    //       );
-    //     },
-    //   ),
-    // );
-    return const Text("Todo: Android Download Manager");
+    final activeTasks = c.activeTasks.toList();
+    final othersTasks = c.othersTasks.toList();
+    return Obx(() {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Download Manager'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: _isAnySelected ? _resumeSelectedTasks : null,
+            ),
+            IconButton(
+              icon: Icon(Icons.pause),
+              onPressed: _isAnySelected ? _pauseSelectedTasks : null,
+            ),
+            IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: _isAnySelected ? _cancelSelectedTasks : null,
+            ),
+          ],
+        ),
+        body: ListView.builder(
+          itemCount: activeTasks.length,
+          itemBuilder: (context, index) {
+            final task = activeTasks[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Checkbox(
+                      value: _selectedTasks.contains(task.id),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value!) {
+                            _selectedTasks.add(task.id);
+                          } else {
+                            _selectedTasks.remove(task.id);
+                          }
+                        });
+                      },
+                    ),
+                    title: Text(task.name),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.cancel),
+                          onPressed: () {
+                            setState(() {
+                              activeTasks.remove(task);
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(task.status.isPaused
+                              ? Icons.play_arrow
+                              : Icons.pause),
+                          onPressed: () {
+                            setState(() {
+                              task.pause();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: LinearProgressIndicator(
+                      value: 0.5,
+                    ),
+                  ),
+                  if (task.detail != null)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('${task.detail}'),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildDesktop(BuildContext context) {

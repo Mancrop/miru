@@ -122,14 +122,17 @@ class MangaDownloader extends DownloadInterface {
         return DownloadStatus.failed;
       }
       _status = DownloadStatus.downloading;
+      _job.status = _status;
       // logger.info('Start download $total items');
       final runtime = ExtensionUtils.runtimes[resource.package]!;
       // 如果在下载的过程中，新的同章节请求过来了，怎么办呢？
       // 此时需要下载管理器重新发送一个新的请求
       // 为了避免重复下载，需要在下载中判断是否某个分集已经下载过
       _status = await downloadInternal(total, runtime, resource);
+      _job.status = _status;
     } catch (e) {
       _status = DownloadStatus.failed;
+      _job.status = _status;
     }
     return _status;
   }
@@ -140,6 +143,7 @@ class MangaDownloader extends DownloadInterface {
       return;
     }
     _status = DownloadStatus.paused;
+    _job.status = _status;
   }
 
   @override
@@ -148,6 +152,7 @@ class MangaDownloader extends DownloadInterface {
       return;
     }
     _status = DownloadStatus.downloading;
+    _job.status = _status;
   }
 
   @override
@@ -156,6 +161,7 @@ class MangaDownloader extends DownloadInterface {
       return;
     }
     _status = DownloadStatus.canceled;
+    _job.status = _status;
   }
 
   @override

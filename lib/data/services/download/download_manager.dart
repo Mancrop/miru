@@ -1,5 +1,7 @@
 // This is implementation is inspired by flutter_download_manager
 // See https://github.com/nabil6391/flutter_download_manager
+import 'dart:math';
+
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
@@ -101,15 +103,15 @@ class DownloadManager {
     DatabaseService.getDownloadJobs().then((jobs) {
       logger.info('Load download jobs from database');
       for (final job in jobs) {
-        logger.info('Load job ${job.jobId}');
-        // 获取id
-        final id = job.jobId;
-        // 为id分配一个新的id
-        _instance._idPool.getSpecNewIdStrict(id);
+        logger.info('Job id: ${job.jobId}, status: ${job.status}');
         switch (job.status) {
           case DownloadStatus.queued:
           case DownloadStatus.downloading:
           case DownloadStatus.paused:
+            // 获取id
+            final id = job.jobId;
+            // 为id分配一个新的id
+            _instance._idPool.getSpecNewIdStrict(id);
             cnt++;
             final newIns = MangaDownloader(job, id);
             newIns.pause();
@@ -314,6 +316,7 @@ class DownloadManager {
     }
     if (download != null) {
       download.cancel();
+      logger.info('Cancel download id: $id, status: ${download.status}');
       // 更新数据库
       assert(download.downloadJob.id == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
