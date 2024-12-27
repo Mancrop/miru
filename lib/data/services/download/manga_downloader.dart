@@ -8,7 +8,6 @@ import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/image_type.dart';
-import 'package:miru_app/utils/log.dart';
 import 'package:path/path.dart' as p;
 
 class MangaDownloader extends DownloadInterface {
@@ -36,7 +35,7 @@ class MangaDownloader extends DownloadInterface {
   int get id => _id;
 
   @override
-  String? get detail => null;
+  String? get detail => _job.resource?.package;
 
   @override
   DownloadStatus get status => _status;
@@ -102,6 +101,9 @@ class MangaDownloader extends DownloadInterface {
         count++;
       }
     }
+    while (status == DownloadStatus.paused || status == DownloadStatus.queued) {
+      await Future.delayed(Duration(seconds: 1));
+    }
     _progress = 1.0;
     return DownloadStatus.completed;
   }
@@ -120,7 +122,7 @@ class MangaDownloader extends DownloadInterface {
         return DownloadStatus.failed;
       }
       _status = DownloadStatus.downloading;
-      logger.info('Start download $total items');
+      // logger.info('Start download $total items');
       final runtime = ExtensionUtils.runtimes[resource.package]!;
       // 如果在下载的过程中，新的同章节请求过来了，怎么办呢？
       // 此时需要下载管理器重新发送一个新的请求

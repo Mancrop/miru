@@ -150,6 +150,7 @@
     "export-log-subtitle": "ログファイルのエクスポート",
     "advanced": "アドバンスド",
     "download": "ダウンロード",
+    "download-manager": "ダウンロードマネージャー",
     "download-subtitle": "ダウンロードマネージャの設定",
     "download-path": "ダウンロードパス",
     "download-path-subtitle": "ダウンロードパスを選択します",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "TMDBバインディングを変更",
     "no-tmdb-data": "TMDBデータは一致していません。自分でデータをバインドしてください",
     "tmdb-key-missing": "TMDB APIキーがありません、設定から入力してください",
-    "tracker": "追跡"
+    "tracker": "追跡",
+    "selectAll": "すべて選択"
   },
   "video": {
     "episodes": "エピソード",
@@ -329,5 +331,21 @@
     "episodes": "エピソード",
     "manga-chapter-read": "マンガ章を読む： {chapters}",
     "anime-episode-watch": "アニメエピソード視聴 ： {episodes}"
+  },
+  "download": {
+    "download-manager": "ダウンロードマネージャー",
+    "resume": "履歴書",
+    "pause": "休止",
+    "cancel": "キャンセル",
+    "downloading": "ダウンロード",
+    "others": "その他",
+    "download-status": {
+      "queued": "キュー内",
+      "downloading": "ダウンロード",
+      "completed": "完了",
+      "failed": "失敗",
+      "paused": "休止",
+      "canceled": "キャンセル"
+    }
   }
 }

@@ -150,6 +150,7 @@
     "export-log-subtitle": "Export log file",
     "advanced": "Advanced",
     "download": "Download",
+    "download-manager": "Download Manager",
     "download-subtitle": "Download Manager settings",
     "download-path": "Download Path",
     "download-path-subtitle": "Select the download path",
@@ -330,5 +331,21 @@
     "episodes": "Episodes",
     "manga-chapter-read": "Manga Chapter Read: {chapters}",
     "anime-episode-watch": "Anime Episode Watched: {episodes}"
+  },
+  "download": {
+    "download-manager": "Download Manager",
+    "resume": "Resume",
+    "pause": "Pause",
+    "cancel": "Cancel",
+    "downloading": "Downloading",
+    "others": "Others",
+    "download-status": {
+      "queued": "In Queue",
+      "downloading": "Downloading",
+      "completed": "Completed",
+      "failed": "Failed",
+      "paused": "Paused",
+      "canceled": "Canceled"
+    }
   }
 }

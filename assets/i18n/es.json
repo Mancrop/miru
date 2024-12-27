@@ -150,6 +150,7 @@
     "export-log-subtitle": "Exportar archivo de registros",
     "advanced": "Avanzado",
     "download": "Descargar",
+    "download-manager": "Download Manager",
     "download-subtitle": "Configuración del gestor de descargas",
     "download-path": "Ruta de descarga",
     "download-path-subtitle": "Seleccionar la ruta de descarga",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "Modificar enlace a TMDB",
     "no-tmdb-data": "No hay datos de TMDB coincidentes, por favor, enlaza los datos tu mismo/a",
     "tmdb-key-missing": "Falta la clave de la API de TMDB, por favor, rellenala en los ajustes",
-    "tracker": "Siguiendo"
+    "tracker": "Siguiendo",
+    "selectAll": "Seleccione todo"
   },
   "video": {
     "episodes": "Episodios",
@@ -329,5 +331,21 @@
     "episodes": "Episodios",
     "manga-chapter-read": "Leído capítulo de manga: {chapters}",
     "anime-episode-watch": "Visto episodio de anime: {episodes}"
+  },
+  "download": {
+    "download-manager": "Download Manager",
+    "resume": "Resumen",
+    "pause": "Pausa",
+    "cancel": "Cancelar",
+    "downloading": "Downloading",
+    "others": "Otros",
+    "download-status": {
+      "queued": "En la cola",
+      "downloading": "Downloading",
+      "completed": "Completado",
+      "failed": "Fracaso",
+      "paused": "Pausa",
+      "canceled": "Cancelado"
+    }
   }
 }

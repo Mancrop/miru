@@ -150,6 +150,7 @@
     "export-log-subtitle": "Ekspor log ke file",
     "advanced": "Lanjutan",
     "download": "Unduh",
+    "download-manager": "Download Manajer",
     "download-subtitle": "Pengaturan Pengelola Unduhan",
     "download-path": "Jalur Unduhan",
     "download-path-subtitle": "Pilih jalur unduhan",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "Ubah binding data TMDB",
     "no-tmdb-data": "No TMDB data matched, please bind the data yourself",
     "tmdb-key-missing": "Kunci API TMDB hilang, silakan isi pengaturannya",
-    "tracker": "Pelacak"
+    "tracker": "Pelacak",
+    "selectAll": "Pilih semua"
   },
   "video": {
     "episodes": "Episode",
@@ -329,5 +331,21 @@
     "episodes": "Episode",
     "manga-chapter-read": "Bacaan Bab Manga: {bab}",
     "anime-episode-watch": "Episode Anime yang Ditonton: {episodes}"
+  },
+  "download": {
+    "download-manager": "Download Manajer",
+    "resume": "Resume resume",
+    "pause": "Jeda jeda (pause)",
+    "cancel": "Pembatalan (Cancel)",
+    "downloading": "Download",
+    "others": "Lain-lain",
+    "download-status": {
+      "queued": "Dalam antrian",
+      "downloading": "Download",
+      "completed": "Selesai",
+      "failed": "gagal gagal gagal gagal",
+      "paused": "Paused (terhenti)",
+      "canceled": "dibatalkan"
+    }
   }
 }

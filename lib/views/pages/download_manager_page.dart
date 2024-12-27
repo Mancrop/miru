@@ -1,9 +1,48 @@
-import 'dart:async';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:get/get.dart';
+import 'package:miru_app/controllers/application_controller.dart';
+import 'package:miru_app/controllers/detail_controller.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/models/download_job.dart';
+import 'package:miru_app/utils/i18n.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
+
+class BottomBorderButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final Widget child;
+  final bool hasBorder;
+
+  const BottomBorderButton({
+    super.key,
+    required this.onPressed,
+    required this.child,
+    required this.hasBorder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return fluent.IconButton(
+      onPressed: onPressed,
+      icon: Container(
+        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        decoration: hasBorder
+            ? BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: fluent.FluentTheme.of(context).accentColor,
+                    width: 3.0,
+                  ),
+                ),
+              )
+            : null,
+        child: child,
+      ),
+    );
+  }
+}
 
 class DownloadManagerPage extends StatefulWidget {
   const DownloadManagerPage({super.key, this.tag});
@@ -17,26 +56,9 @@ class DownloadManagerPage extends StatefulWidget {
 typedef Task = TaskInternal;
 
 class _DownloadManagerPageState extends State<DownloadManagerPage> {
-  List<Task> _downloading = []; // 任务列表
-  List<Task> _queue = []; // 等待队列
-  List<Task> _others = []; // 其他任务
-  final Set<Task> _selectedTasks = {}; // 选中的任务
-  // ignore: unused_field
-  late Timer _timer;
-  final downloadManager = DownloadManager();
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      setState(() {
-        // 更新任务状态
-        _downloading = downloadManager.downloading;
-        _queue = downloadManager.queue;
-        _others = downloadManager.others;
-      });
-    });
-  }
+  final c = Get.find<ApplicationController>();
+  final Set<int> _selectedTasks = {}; // 选中的任务
+  int curTab = 0;
 
   Widget listUtils(List<Task> listToDisplay) {
     return Expanded(
@@ -60,89 +82,124 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
                   }
                   return fluent.FluentTheme.of(context).micaBackgroundColor;
                 }),
-                selected: _selectedTasks.contains(task),
-                onSelectionChange: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedTasks.add(task);
-                    } else {
-                      _selectedTasks.remove(task);
-                    }
-                  });
-                },
-                leading: fluent.Checkbox(
-                  checked: _selectedTasks.contains(task),
-                  onChanged: (value) {
-                    setState(() {
-                      if (value!) {
-                        _selectedTasks.add(task);
-                      } else {
-                        _selectedTasks.remove(task);
-                      }
-                    });
-                  },
-                ),
-                title: Row(
-                  children: [
-                    Text(task.name),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: fluent.ProgressBar(
-                        value: task.progress * 100,
-                        backgroundColor: Colors.grey[200],
-                        strokeWidth: 6,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                        icon: Icon(fluent.FluentIcons.cancel),
-                        onPressed: () {
-                          setState(() {
-                            task.cancel();
-                            listToDisplay.remove(task);
-                          });
-                        }),
-                    IconButton(
-                      icon: Icon(task.status.isPaused
-                          ? fluent.FluentIcons.play
-                          : fluent.FluentIcons.pause),
-                      onPressed: () {
+                selected: task.status.isActive
+                    ? _selectedTasks.contains(task.id)
+                    : false,
+                onSelectionChange: task.status.isActive
+                    ? (selected) {
                         setState(() {
-                          if (task.status.isPaused) {
-                            task.resume();
+                          if (selected) {
+                            _selectedTasks.add(task.id);
                           } else {
-                            task.pause();
+                            _selectedTasks.remove(task.id);
                           }
                         });
-                      },
+                      }
+                    : null,
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            if (task.status.isActive)
+                              fluent.Checkbox(
+                                checked: _selectedTasks.contains(task.id),
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (value!) {
+                                      _selectedTasks.add(task.id);
+                                    } else {
+                                      _selectedTasks.remove(task.id);
+                                    }
+                                  });
+                                },
+                              ),
+                            const SizedBox(width: 16),
+                            Text(task.name),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (task.status.isActive) ...[
+                              IconButton(
+                                  icon: Icon(fluent.FluentIcons.cancel),
+                                  onPressed: () {
+                                    setState(() {
+                                      task.cancel();
+                                      listToDisplay.remove(task);
+                                    });
+                                  }),
+                              IconButton(
+                                icon: Icon(task.status.isPaused
+                                    ? fluent.FluentIcons.play
+                                    : fluent.FluentIcons.pause),
+                                onPressed: () {
+                                  setState(() {
+                                    if (task.status.isPaused) {
+                                      task.resume();
+                                    } else {
+                                      task.pause();
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                            if (task.status.isDead) ...[
+                              IconButton(
+                                icon: Icon(fluent.FluentIcons.refresh),
+                                onPressed: () {
+                                  setState(() {
+                                    // TODO: 重新下载任务
+                                  });
+                                },
+                              ),
+                            ]
+                          ],
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(task.isExpanded
-                          ? fluent.FluentIcons.chevron_up
-                          : fluent.FluentIcons.chevron_down),
-                      onPressed: () {
-                        setState(() {
-                          task.isExpanded = !task.isExpanded;
-                        });
-                      },
+                    const SizedBox(height: 8),
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: fluent.ProgressBar(
+                            value: task.progress * 100,
+                            backgroundColor: Colors.grey[200],
+                            strokeWidth: 6,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
                     ),
                   ],
                 ),
-                subtitle: task.isExpanded
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          const Text('任务详情...'),
-                          const SizedBox(height: 8),
-                        ],
-                      )
-                    : null,
+                subtitle: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 16),
+                        Text('download.download-status.${task.status.status}'.i18n),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 16),
+                        if (task.detail != null) Text(task.detail!),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -237,104 +294,122 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
   }
 
   Widget _buildDesktop(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final height = constraints.maxHeight;
-        return Center(
-          child: ConstrainedBox(
-              constraints: BoxConstraints(
-                  maxWidth: width * 0.8 < 1600 ? width * 0.8 : 1600,
-                  maxHeight: height * 0.8 < 1200 ? height * 0.8 : 1200),
-              child: Stack(
-                children: [
-                  Container(
-                      decoration: BoxDecoration(
-                    color: fluent.FluentTheme.of(context).menuColor,
-                    borderRadius: BorderRadius.circular(12),
-                  )),
-                  Padding(
-                    padding: const EdgeInsets.all(64),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Download Manager',
-                              style: fluent.FluentTheme.of(context)
-                                  .typography
-                                  .title,
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                fluent.Button(
-                                  onPressed: _isAnySelected
-                                      ? _resumeSelectedTasks
-                                      : null,
-                                  child: const Text('继续'),
-                                ),
-                                const SizedBox(width: 8),
-                                fluent.Button(
-                                  onPressed: _isAnySelected
-                                      ? _pauseSelectedTasks
-                                      : null,
-                                  child: const Text('暂停'),
-                                ),
-                                const SizedBox(width: 8),
-                                fluent.Button(
-                                  onPressed: _isAnySelected
-                                      ? _cancelSelectedTasks
-                                      : null,
-                                  child: const Text('取消'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        listUtils(_downloading),
-                        if (_queue.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Divider(
-                            color: Colors.grey.withOpacity(0.3), // 更淡的分割线
-                            thickness: 1,
+    return Obx(() {
+      final activeTasks = c.activeTasks.toList();
+      final othersTasks = c.othersTasks.toList();
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final height = constraints.maxHeight;
+          return Center(
+            child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: width * 0.8 < 1600 ? width * 0.8 : 1600,
+                    maxHeight: height * 0.8 < 1200 ? height * 0.8 : 1200),
+                child: Stack(
+                  children: [
+                    Container(
+                        decoration: BoxDecoration(
+                      color: fluent.FluentTheme.of(context).menuColor,
+                      borderRadius: BorderRadius.circular(12),
+                    )),
+                    Padding(
+                      padding: const EdgeInsets.all(64),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'download.download-manager'.i18n,
+                                style: fluent.FluentTheme.of(context)
+                                    .typography
+                                    .title,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  fluent.Button(
+                                    onPressed: _isAnySelected
+                                        ? _resumeSelectedTasks
+                                        : null,
+                                    child: Text('download.resume'.i18n),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  fluent.Button(
+                                    onPressed: _isAnySelected
+                                        ? _pauseSelectedTasks
+                                        : null,
+                                    child: Text('download.pause'.i18n),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  fluent.Button(
+                                    onPressed: _isAnySelected
+                                        ? _cancelSelectedTasks
+                                        : null,
+                                    child: Text('download.cancel'.i18n),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          listUtils(_queue),
-                        ],
-                        if (_others.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Divider(
-                            color: Colors.grey.withOpacity(0.3), // 更淡的分割线
-                            thickness: 1,
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              BottomBorderButton(
+                                onPressed: () {
+                                  setState(() {
+                                    curTab = 0;
+                                  });
+                                },
+                                hasBorder: curTab == 0,
+                                child: Text('download.downloading'.i18n),
+                              ),
+                              BottomBorderButton(
+                                onPressed: () {
+                                  setState(() {
+                                    curTab = 1;
+                                  });
+                                },
+                                hasBorder: curTab == 1,
+                                child: Text('download.others'.i18n),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          listUtils(_others),
+                          const SizedBox(height: 32),
+                          if (curTab == 0)
+                            listUtils(activeTasks)
+                          else
+                            listUtils(othersTasks),
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              )),
-        );
-      },
-    );
+                  ],
+                )),
+          );
+        },
+      );
+    });
   }
 
   void _resumeSelectedTasks() {
     // 恢复选中任务的逻辑
+    DownloadManager().resumeByIds(_selectedTasks.toList());
+    _selectedTasks.clear();
   }
 
   void _pauseSelectedTasks() {
     // 暂停选中任务的逻辑
+    DownloadManager().pauseByIds(_selectedTasks.toList());
+    _selectedTasks.clear();
   }
 
   void _cancelSelectedTasks() {
     // 取消选中任务的逻辑
+    DownloadManager().cancelByIds(_selectedTasks.toList());
+    _selectedTasks.clear();
   }
 
   @override
@@ -343,11 +418,5 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
       androidBuilder: _buildAndroid,
       desktopBuilder: _buildDesktop,
     );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
   }
 }

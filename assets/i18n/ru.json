@@ -150,6 +150,7 @@
     "export-log-subtitle": "Экспорт файла журнала",
     "advanced": "Расширенные",
     "download": "Скачать",
+    "download-manager": "Диспетчер загрузки",
     "download-subtitle": "Настройки диспетчера загрузок",
     "download-path": "Путь загрузки",
     "download-path-subtitle": "Выберите путь загрузки",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "Изменить привязку TMDB",
     "no-tmdb-data": "Данные TMDB не совпадают, привяжите данные самостоятельно",
     "tmdb-key-missing": "Ключ API TMDB отсутствует, заполните настройки",
-    "tracker": "Отслеживание"
+    "tracker": "Отслеживание",
+    "selectAll": "Выберите все"
   },
   "video": {
     "episodes": "Эпизоды",
@@ -329,5 +331,21 @@
     "episodes": "Эпизоды",
     "manga-chapter-read": "Прочитано глав манги: {chapters}",
     "anime-episode-watch": "Просмотрено аниме-эпизодов: {episodes}"
+  },
+  "download": {
+    "download-manager": "Диспетчер загрузки",
+    "resume": "Резюме",
+    "pause": "Пауза",
+    "cancel": "Отменить",
+    "downloading": "Скачать",
+    "others": "Другие",
+    "download-status": {
+      "queued": "В очереди",
+      "downloading": "Скачать",
+      "completed": "Завершено",
+      "failed": "Не удалось",
+      "paused": "Пауза",
+      "canceled": "Отменено"
+    }
   }
 }

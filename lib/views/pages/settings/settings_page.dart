@@ -436,17 +436,6 @@ class _SettingsPageState extends State<SettingsPage> {
         content: Column(
           children: [
             SettingsTile(
-                isCard: true,
-                title: 'settings.download-manager'.i18n,
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  if (!Platform.isAndroid) {
-                    router.push('/settings/download/download_manager');
-                  } else {
-                    Get.to(() => const DownloadManagerPage());
-                  }
-                }),
-            SettingsTile(
                 title: 'settings.download-path'.i18n,
                 buildSubtitle: () => 'settings.download-path-subtitle'.i18n,
                 trailing: PlatformWidget(
@@ -507,13 +496,26 @@ class _SettingsPageState extends State<SettingsPage> {
                 '10': 10,
               },
               applyValue: (value) {
-                MiruStorage.setSetting(
-                    SettingKey.downloadMaxTasks, value);
+                MiruStorage.setSetting(SettingKey.downloadMaxTasks, value);
               },
               buildGroupValue: () {
                 return MiruStorage.getSetting(SettingKey.downloadMaxTasks);
               },
             ),
+            const SizedBox(height: 8),
+            SettingsTile(
+                isCard: true,
+                title: 'settings.download-manager'.i18n,
+                icon: !Platform.isAndroid ? Icon(fluent.FluentIcons.hard_drive, size: 36) : Icon(Icons.hardware),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  if (!Platform.isAndroid) {
+                    router.push('/settings/download/download_manager');
+                  } else {
+                    Get.to(() => const DownloadManagerPage());
+                  }
+                }),
+                
           ],
         ),
         title: 'settings.download'.i18n,

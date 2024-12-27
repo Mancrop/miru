@@ -150,6 +150,7 @@
     "export-log-subtitle": "लॉग फ़ाइल का निर्यात करें",
     "advanced": "उन्नत",
     "download": "डाउनलोड करें",
+    "download-manager": "डाउनलोड प्रबंधक",
     "download-subtitle": "डाउनलोड प्रबंधक सेटिंग्स",
     "download-path": "डाउनलोड पथ",
     "download-path-subtitle": "डाउनलोड पथ का चयन करें",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "TMDB बाइंडिंग बदलें",
     "no-tmdb-data": "कोई TMDB डेटा मेल नहीं रहा है, कृपया खुद डेटा बाइंड करें",
     "tmdb-key-missing": "TMDB API कुंजी गायब है, कृपया सेटिंग्स में दर्ज करें",
-    "tracker": "ट्रैकिंग"
+    "tracker": "ट्रैकिंग",
+    "selectAll": "सभी का चयन करें"
   },
   "video": {
     "episodes": "एपिसोड्स",
@@ -329,5 +331,21 @@
     "episodes": "एपिसोड",
     "manga-chapter-read": "Manga Chapter Read: {chapters}",
     "anime-episode-watch": "एनीम एपिसोड देखे गएः {episodes}"
+  },
+  "download": {
+    "download-manager": "डाउनलोड प्रबंधक",
+    "resume": "फिर से शुरू करें",
+    "pause": "रुकावट",
+    "cancel": "रद्द करें",
+    "downloading": "डाउनलोड करना",
+    "others": "अन्य",
+    "download-status": {
+      "queued": "कतार में",
+      "downloading": "डाउनलोड करना",
+      "completed": "पूरा किया गया",
+      "failed": "असफल रहा",
+      "paused": "रुका हुआ",
+      "canceled": "रद्द कर दिया गया"
+    }
   }
 }

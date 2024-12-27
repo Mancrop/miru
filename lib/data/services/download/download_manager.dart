@@ -1,9 +1,11 @@
 // This is implementation is inspired by flutter_download_manager
 // See https://github.com/nabil6391/flutter_download_manager
-import 'dart:collection';
+import 'package:get/get.dart';
+import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
 import 'package:miru_app/data/services/download/manga_downloader.dart';
 import 'package:miru_app/models/download_job.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/data/services/database_service.dart';
 
@@ -47,7 +49,6 @@ class IdPool {
 // 它需要与UI层耦合
 class TaskInternal {
   late DownloadInterface _download;
-  bool isExpanded = false;
 
   TaskInternal({required DownloadInterface download}) {
     _download = download;
@@ -63,33 +64,28 @@ class TaskInternal {
 
   String? get detail => _download.detail;
 
+  int get id => _download.id;
+
   void pause() {
-    _download.pause();
-    // 更新数据库
-    assert(_download.downloadJob.id == _download.id);
-    DatabaseService.putDownloadJobsById(_download.id, _download.downloadJob);
+    DownloadManager().pauseById(_download.id);
   }
 
   void resume() {
-    _download.resume();
-    // 更新数据库
-    assert(_download.downloadJob.id == _download.id);
-    DatabaseService.putDownloadJobsById(_download.id, _download.downloadJob);
+    DownloadManager().resumeById(_download.id);
   }
 
   void cancel() {
-    _download.cancel();
-    // 更新数据库
-    assert(_download.downloadJob.id == _download.id);
-    DatabaseService.putDownloadJobsById(_download.id, _download.downloadJob);
+    DownloadManager().cancelById(_download.id);
   }
 }
 
 class DownloadManager {
-  final _queue = Queue<DownloadInterface>();
+  final _queue = List<DownloadInterface>.empty(growable: true);
   final _downloading = List<DownloadInterface>.empty(growable: true);
+  final _paused = List<DownloadInterface>.empty(growable: true);
   final _others = List<DownloadInterface>.empty(growable: true);
   final _idPool = IdPool();
+  final c = Get.find<ApplicationController>();
 
   bool get isDownloading => _downloading.isNotEmpty && _queue.isNotEmpty;
 
@@ -100,6 +96,30 @@ class DownloadManager {
   }
 
   static void init() {
+    // 从数据库中加载下载任务
+    DatabaseService.getDownloadJobs().then((jobs) {
+      logger.info('Load download jobs from database');
+      for (final job in jobs) {
+        logger.info('Load job ${job.jobId}');
+        // 获取id
+        final id = job.jobId;
+        // 为id分配一个新的id
+        _instance._idPool.getSpecNewIdStrict(id);
+        switch (job.status) {
+          case DownloadStatus.queued:
+          case DownloadStatus.downloading:
+          case DownloadStatus.paused:
+            final newIns = MangaDownloader(job, id);
+            newIns.pause();
+            _instance._paused.add(newIns);
+            break;
+          case DownloadStatus.canceled:
+          case DownloadStatus.failed:
+          case DownloadStatus.completed:
+            break;
+        }
+      }
+    });
     _instance = DownloadManager._internal();
   }
 
@@ -140,6 +160,8 @@ class DownloadManager {
   }
 
   void _execution() async {
+    final activeTasks = c.activeTasks;
+    final othersTasks = c.othersTasks;
     while (true) {
       final maxTasks = MiruStorage.getSetting(SettingKey.downloadMaxTasks);
 
@@ -150,23 +172,15 @@ class DownloadManager {
             download.status.isFailed) {
           if (download.status.isComplete) {
             download.releaseResource();
+            // 更新数据库
+            assert(download.downloadJob.id == download.id);
+            DatabaseService.putDownloadJobsById(
+                download.id, download.downloadJob);
           }
           _others.add(download);
           return true;
         } else if (download.status.isPaused) {
-          _queue.add(download);
-          return true;
-        }
-        return false;
-      });
-      _queue.removeWhere((download) {
-        if (download.status.isComplete ||
-            download.status.isCanceled ||
-            download.status.isFailed) {
-          if (download.status.isComplete) {
-            download.releaseResource();
-          }
-          _others.add(download);
+          _paused.add(download);
           return true;
         }
         return false;
@@ -175,18 +189,29 @@ class DownloadManager {
         if (_queue.isEmpty) {
           break;
         }
-        // 需要找到第一个是queued的任务,而不是paused的任务
-        final download = _queue.firstWhere(
-            (download) => download.status.isQueued,
-            orElse: () => _queue.first);
-        if (download.status.isPaused) {
-          break;
-        }
+        final download = _queue.removeAt(0);
         download.download();
         _downloading.add(download);
-        _queue.remove(download);
       }
-      await Future.delayed(Duration(milliseconds: 1000));
+
+      // 更新UI
+      activeTasks.clear();
+      for (final download in _downloading) {
+        activeTasks.add(TaskInternal(download: download));
+      }
+      for (final download in _queue) {
+        activeTasks.add(TaskInternal(download: download));
+      }
+      for (final download in _paused) {
+        activeTasks.add(TaskInternal(download: download));
+      }
+      othersTasks.clear();
+      for (final download in _others) {
+        othersTasks.add(TaskInternal(download: download));
+      }
+      activeTasks.refresh();
+      othersTasks.refresh();
+      await Future.delayed(Duration(milliseconds: 500));
     }
   }
 
@@ -201,30 +226,29 @@ class DownloadManager {
 
   void resumeAll() {
     final maxTasks = MiruStorage.getSetting(SettingKey.downloadMaxTasks);
-    for (final download in _queue) {
-      if (download.status.isPaused) {
-        if (_downloading.length < maxTasks) {
-          download.resume();
-          _downloading.add(download);
-          // 更新数据库
-          assert(download.downloadJob.id == download.id);
-          DatabaseService.putDownloadJobsById(
-              download.id, download.downloadJob);
-        } else {
-          break;
-        }
+    for (int i = _downloading.length; i < maxTasks; i++) {
+      if (_paused.isEmpty) {
+        break;
       }
+      final download = _paused.removeLast();
+      download.resume();
+      // 更新数据库
+      assert(download.downloadJob.id == download.id);
+      DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _downloading.add(download);
     }
   }
 
   void cancelAll() {
-    for (final download in _downloading) {
+    for (int i = 0; i < _downloading.length; i++) {
+      final download = _downloading.removeLast();
       download.cancel();
       // 更新数据库
       assert(download.downloadJob.id == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
     }
-    for (final download in _queue) {
+    for (int i = 0; i < _queue.length; i++) {
+      final download = _queue.removeLast();
       download.cancel();
       // 更新数据库
       assert(download.downloadJob.id == download.id);
@@ -232,47 +256,64 @@ class DownloadManager {
     }
   }
 
-  // 因为更新有延迟,所以返回的时候需要过滤掉当前状态与状态队列不一致的元素
-  List<TaskInternal> get queue => _queue
-      .where((download) => download.status.isQueued || download.status.isPaused)
-      .map((download) => TaskInternal(download: download))
-      .toList();
-
-  List<TaskInternal> get downloading => _downloading
-      .where((download) => download.status.isDownloading)
-      .map((download) => TaskInternal(download: download))
-      .toList();
-
-  List<TaskInternal> get others => _others
-      .where((download) =>
-          download.status.isComplete ||
-          download.status.isCanceled ||
-          download.status.isFailed)
-      .map((download) => TaskInternal(download: download))
-      .toList();
-
   void pauseById(int id) {
-    final download = _downloading.firstWhere((download) => download.id == id);
-    download.pause();
-    // 更新数据库
-    assert(download.downloadJob.id == download.id);
-    DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+    DownloadInterface? download;
+    // 在 _downloading 列表中查找
+    download = _downloading.firstWhereOrNull((download) => download.id == id);
+    if (download != null) {
+      _downloading.remove(download);
+    } else {
+      // 在 _queue 队列中查找
+      download = _queue.firstWhereOrNull((download) => download.id == id);
+      if (download != null) {
+        _queue.remove(download);
+      }
+    }
+    if (download != null) {
+      download.pause();
+      // 更新数据库
+      assert(download.downloadJob.id == download.id);
+      DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _paused.add(download);
+    }
   }
 
   void resumeById(int id) {
-    final download = _downloading.firstWhere((download) => download.id == id);
+    final download = _paused.firstWhere((download) => download.id == id);
     download.resume();
     // 更新数据库
     assert(download.downloadJob.id == download.id);
     DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+    _paused.remove(download);
+    _queue.add(download);
   }
 
   void cancelById(int id) {
-    final download = _downloading.firstWhere((download) => download.id == id);
-    download.cancel();
-    // 更新数据库
-    assert(download.downloadJob.id == download.id);
-    DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+    DownloadInterface? download;
+    // 在 _downloading 列表中查找
+    download = _downloading.firstWhereOrNull((download) => download.id == id);
+    if (download != null) {
+      _downloading.remove(download);
+    } else {
+      // 在 _queue 队列中查找
+      download = _queue.firstWhereOrNull((download) => download.id == id);
+      if (download != null) {
+        _queue.remove(download);
+      } else {
+        // 在 _paused 列表中查找
+        download = _paused.firstWhereOrNull((download) => download.id == id);
+        if (download != null) {
+          _paused.remove(download);
+        }
+      }
+    }
+    if (download != null) {
+      download.cancel();
+      // 更新数据库
+      assert(download.downloadJob.id == download.id);
+      DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _others.add(download);
+    }
   }
 
   void pauseByIds(List<int> ids) {
@@ -291,13 +332,5 @@ class DownloadManager {
     for (final id in ids) {
       cancelById(id);
     }
-  }
-
-  void pauseByIndex(int index) {
-    final download = _downloading[index];
-    download.pause();
-    // 更新数据库
-    assert(download.downloadJob.id == download.id);
-    DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
   }
 }

@@ -52,6 +52,14 @@ extension DownloadStatusExtension on DownloadStatus {
   bool get isCanceled {
     return this == DownloadStatus.canceled;
   }
+
+  bool get isActive {
+    return this == DownloadStatus.downloading || this == DownloadStatus.queued || this == DownloadStatus.paused;
+  }
+
+  bool get isDead {
+    return this == DownloadStatus.failed || this == DownloadStatus.canceled || this == DownloadStatus.completed;
+  }
 }
 
 enum ResourceType {

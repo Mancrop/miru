@@ -150,6 +150,7 @@
     "export-log-subtitle": "导出日志文件到本地",
     "advanced": "高级",
     "download": "下载",
+    "download-manager": "下载管理器",
     "download-subtitle": "下载管理器设置",
     "download-path": "下载路径",
     "download-path-subtitle": "选择下载路径",
@@ -173,7 +174,8 @@
     "modify-tmdb-binding": "修改 TMDB 绑定",
     "no-tmdb-data": "未匹配到 TMDB 数据，请自行绑定数据",
     "tmdb-key-missing": "TMDB API Key 丢失，请前往设置填写",
-    "tracker": "跟踪"
+    "tracker": "跟踪",
+    "selectAll": "选择所有"
   },
   "video": {
     "episodes": "剧集",
@@ -329,5 +331,21 @@
     "episodes": "进度",
     "manga-chapter-read": "看过的漫画章节: {chapters}",
     "anime-episode-watch": "看过的动画剧集: {episodes}"
+  },
+  "download": {
+    "download-manager": "下载管理器",
+    "resume": "恢复",
+    "pause": "暂停",
+    "cancel": "取消",
+    "downloading": "下载",
+    "others": "其它",
+    "download-status": {
+      "queued": "排队中",
+      "downloading": "下载",
+      "completed": "完成",
+      "failed": "失败",
+      "paused": "暂停",
+      "canceled": "取消"
+    }
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 
 class ApplicationController extends GetxController {
   static get find => Get.find();
 
   final themeText = "system".obs;
+  final activeTasks = <TaskInternal>[].obs;
+  final othersTasks = <TaskInternal>[].obs;
 
   @override
   void onInit() {
