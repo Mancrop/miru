@@ -133,6 +133,11 @@ class DatabaseService {
     );
   }
 
+  // 删除全部DownloadJob
+  static Future<void> deleteAllDownloadJobs() async {
+    return db.writeTxn(() => db.downloadJobs.where().deleteAll());
+  }
+
 
   // 扩展设置
   // 获取扩展设置

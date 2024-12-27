@@ -96,6 +96,7 @@ class DownloadManager {
   }
 
   static void init() {
+    var cnt = 0;
     // 从数据库中加载下载任务
     DatabaseService.getDownloadJobs().then((jobs) {
       logger.info('Load download jobs from database');
@@ -109,6 +110,7 @@ class DownloadManager {
           case DownloadStatus.queued:
           case DownloadStatus.downloading:
           case DownloadStatus.paused:
+            cnt++;
             final newIns = MangaDownloader(job, id);
             newIns.pause();
             _instance._paused.add(newIns);
@@ -120,6 +122,9 @@ class DownloadManager {
         }
       }
     });
+    if (cnt == 0) {
+      DatabaseService.deleteAllDownloadJobs();
+    }
     _instance = DownloadManager._internal();
   }
 
