@@ -209,9 +209,10 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
   bool get _isAnySelected => _selectedTasks.isNotEmpty;
 
   Widget _buildAndroid(BuildContext context) {
-    final activeTasks = c.activeTasks.toList();
-    final othersTasks = c.othersTasks.toList();
     return Obx(() {
+      final activeTasks = c.activeTasks.toList();
+      final othersTasks = c.othersTasks.toList();
+      final tasks = activeTasks + othersTasks;
       return Scaffold(
         appBar: AppBar(
           title: Text('Download Manager'),
@@ -231,35 +232,37 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
           ],
         ),
         body: ListView.builder(
-          itemCount: activeTasks.length,
+          itemCount: tasks.length,
           itemBuilder: (context, index) {
-            final task = activeTasks[index];
+            final task = tasks[index];
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
                   ListTile(
-                    leading: Checkbox(
-                      value: _selectedTasks.contains(task.id),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value!) {
-                            _selectedTasks.add(task.id);
-                          } else {
-                            _selectedTasks.remove(task.id);
-                          }
-                        });
-                      },
-                    ),
+                    leading: task.status.isActive
+                        ? Checkbox(
+                            value: _selectedTasks.contains(task.id),
+                            onChanged: (value) {
+                              setState(() {
+                                if (value!) {
+                                  _selectedTasks.add(task.id);
+                                } else {
+                                  _selectedTasks.remove(task.id);
+                                }
+                              });
+                            },
+                          )
+                        : null,
                     title: Text(task.name),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      if (task.status.isActive) ...[
                         IconButton(
                           icon: Icon(Icons.cancel),
                           onPressed: () {
                             setState(() {
-                              activeTasks.remove(task);
+                              tasks.remove(task);
+                              task.cancel();
                             });
                           },
                         ),
@@ -269,24 +272,34 @@ class _DownloadManagerPageState extends State<DownloadManagerPage> {
                               : Icons.pause),
                           onPressed: () {
                             setState(() {
-                              task.pause();
+                              if (task.status.isPaused) {
+                                task.resume();
+                              } else {
+                                task.pause();
+                              }
                             });
                           },
                         ),
                       ],
-                    ),
+                    ]),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: LinearProgressIndicator(
-                      value: 0.5,
+                      value: task.progress,
                     ),
                   ),
-                  if (task.detail != null)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text('${task.detail}'),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('download.download-status.${task.status.status}'
+                            .i18n),
+                        if (task.detail != null) Text('${task.detail}'),
+                      ],
                     ),
+                  ),
                 ],
               ),
             );

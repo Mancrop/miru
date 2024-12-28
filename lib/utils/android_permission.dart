@@ -6,5 +6,11 @@ Future<bool> requestStoragePermissions() async {
   if (!status.isGranted) {
     status = await Permission.storage.request();
   }
-  return status.isGranted;
+  var status1 = await Permission.manageExternalStorage.request();
+  if (status.isGranted) {
+    return true;
+  } else if (status.isPermanentlyDenied) {
+    openAppSettings();
+  }
+  return status.isGranted && status1.isGranted;
 }

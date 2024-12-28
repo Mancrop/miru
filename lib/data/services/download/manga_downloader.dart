@@ -8,6 +8,7 @@ import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/image_type.dart';
+import 'package:miru_app/utils/log.dart';
 import 'package:path/path.dart' as p;
 
 class MangaDownloader extends DownloadInterface {
@@ -133,6 +134,7 @@ class MangaDownloader extends DownloadInterface {
     } catch (e) {
       _status = DownloadStatus.failed;
       _job.status = _status;
+      logger.warning('Download failed', e);
     }
     return _status;
   }

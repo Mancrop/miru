@@ -443,10 +443,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () async {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {
+                        String newPath = p.join(path, 'Miru');
                         if (await requestStoragePermissions()) {
-                          String newPath = p.join(path, 'Miru');
                           MiruStorage.setSetting(
                               SettingKey.downloadPath, newPath);
+                          // 在这个文件夹下创建.nomedia文件
+                          final noMediaFile = File(p.join(newPath, '.nomedia'));
+                          if (!noMediaFile.existsSync()) {
+                            noMediaFile.createSync(recursive: true);
+                          }
                         }
                       }
                     },
@@ -506,7 +511,9 @@ class _SettingsPageState extends State<SettingsPage> {
             SettingsTile(
                 isCard: true,
                 title: 'settings.download-manager'.i18n,
-                icon: !Platform.isAndroid ? Icon(fluent.FluentIcons.hard_drive, size: 36) : Icon(Icons.hardware),
+                icon: !Platform.isAndroid
+                    ? Icon(fluent.FluentIcons.hard_drive, size: 36)
+                    : null,
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   if (!Platform.isAndroid) {
@@ -515,7 +522,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     Get.to(() => const DownloadManagerPage());
                   }
                 }),
-                
           ],
         ),
         title: 'settings.download'.i18n,

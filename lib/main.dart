@@ -5,10 +5,12 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
+import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_directory.dart';
 import 'package:miru_app/utils/request.dart';
@@ -83,8 +85,7 @@ void main(List<String> args) async {
     }
 
     if (Platform.isAndroid) {
-      // Todo: Android Foreground Task
-      // FlutterForegroundTask.initCommunicationPort();
+      FlutterForegroundTask.initCommunicationPort();
       SystemUiOverlayStyle style = const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
@@ -111,9 +112,15 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     c = Get.put(ApplicationController());
+    super.initState();
+
+    if (Platform.isAndroid) {
+      logger.info("initForegroundService");
+      initForegroundService();
+    }
+
     // 初始化下载管理器
     DownloadManager.init();
-    super.initState();
   }
 
   Widget _buildMobileMain(BuildContext context) {

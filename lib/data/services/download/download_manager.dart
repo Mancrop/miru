@@ -1,11 +1,12 @@
 // This is implementation is inspired by flutter_download_manager
 // See https://github.com/nabil6391/flutter_download_manager
-import 'dart:math';
+import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
 import 'package:miru_app/data/services/download/manga_downloader.dart';
+import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
@@ -91,7 +92,7 @@ class DownloadManager {
 
   bool get isDownloading => _downloading.isNotEmpty && _queue.isNotEmpty;
 
-  static late DownloadManager _instance;
+  static final DownloadManager _instance = DownloadManager._internal();
 
   factory DownloadManager() {
     return _instance;
@@ -103,7 +104,6 @@ class DownloadManager {
     DatabaseService.getDownloadJobs().then((jobs) {
       logger.info('Load download jobs from database');
       for (final job in jobs) {
-        logger.info('Job id: ${job.jobId}, status: ${job.status}');
         switch (job.status) {
           case DownloadStatus.queued:
           case DownloadStatus.downloading:
@@ -112,14 +112,20 @@ class DownloadManager {
             final id = job.jobId;
             // 为id分配一个新的id
             _instance._idPool.getSpecNewIdStrict(id);
+            logger.info('id: $id,Job id: ${job.jobId}, status: ${job.status}');
             cnt++;
             final newIns = MangaDownloader(job, id);
             newIns.pause();
+            // 更新数据库
+            assert(newIns.downloadJob.jobId == newIns.id);
+            DatabaseService.putDownloadJobsById(newIns.id, newIns.downloadJob);
             _instance._paused.add(newIns);
             break;
           case DownloadStatus.canceled:
           case DownloadStatus.failed:
           case DownloadStatus.completed:
+            // 删除数据库中的任务
+            DatabaseService.deleteDownloadJobById(job.jobId);
             break;
         }
       }
@@ -127,12 +133,10 @@ class DownloadManager {
     if (cnt == 0) {
       DatabaseService.deleteAllDownloadJobs();
     }
-    _instance = DownloadManager._internal();
+    _instance._execution();
   }
 
-  DownloadManager._internal() {
-    _execution();
-  }
+  DownloadManager._internal();
 
   double get progress {
     if (!isDownloading) {
@@ -172,6 +176,18 @@ class DownloadManager {
     while (true) {
       final maxTasks = MiruStorage.getSetting(SettingKey.downloadMaxTasks);
 
+      if (Platform.isAndroid) {
+        // 检查前台任务
+        if (activeTasks.isNotEmpty && !await isRunningService()) {
+          // 启动前台任务
+          await startService();
+        }
+        if (activeTasks.isEmpty && await isRunningService()) {
+          // 停止前台任务
+          await stopService();
+        }
+      }
+
       // clear not active download
       _downloading.removeWhere((download) {
         if (download.status.isComplete ||
@@ -180,7 +196,13 @@ class DownloadManager {
           if (download.status.isComplete) {
             download.releaseResource();
             // 更新数据库
-            assert(download.downloadJob.id == download.id);
+            assert(download.downloadJob.jobId == download.id);
+            DatabaseService.putDownloadJobsById(
+                download.id, download.downloadJob);
+          }
+          if (download.status.isCanceled || download.status.isFailed) {
+            // 更新数据库
+            assert(download.downloadJob.jobId == download.id);
             DatabaseService.putDownloadJobsById(
                 download.id, download.downloadJob);
           }
@@ -223,24 +245,25 @@ class DownloadManager {
   }
 
   void pauseAll() {
-    for (final download in _downloading) {
+    for (int i = 0; i < _downloading.length; i++) {
+      final download = _downloading.removeLast();
       download.pause();
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
     }
   }
 
   void resumeAll() {
     final maxTasks = MiruStorage.getSetting(SettingKey.downloadMaxTasks);
-    for (int i = _downloading.length; i < maxTasks; i++) {
+    for (int i = _paused.length; i < maxTasks; i++) {
       if (_paused.isEmpty) {
         break;
       }
       final download = _paused.removeLast();
       download.resume();
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
       _downloading.add(download);
     }
@@ -251,14 +274,21 @@ class DownloadManager {
       final download = _downloading.removeLast();
       download.cancel();
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
     }
     for (int i = 0; i < _queue.length; i++) {
       final download = _queue.removeLast();
       download.cancel();
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
+      DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+    }
+    for (int i = 0; i < _paused.length; i++) {
+      final download = _paused.removeLast();
+      download.cancel();
+      // 更新数据库
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
     }
   }
@@ -279,7 +309,7 @@ class DownloadManager {
     if (download != null) {
       download.pause();
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
       _paused.add(download);
     }
@@ -289,7 +319,7 @@ class DownloadManager {
     final download = _paused.firstWhere((download) => download.id == id);
     download.resume();
     // 更新数据库
-    assert(download.downloadJob.id == download.id);
+    assert(download.downloadJob.jobId == download.id);
     DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
     _paused.remove(download);
     _queue.add(download);
@@ -316,9 +346,8 @@ class DownloadManager {
     }
     if (download != null) {
       download.cancel();
-      logger.info('Cancel download id: $id, status: ${download.status}');
       // 更新数据库
-      assert(download.downloadJob.id == download.id);
+      assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
       _others.add(download);
     }

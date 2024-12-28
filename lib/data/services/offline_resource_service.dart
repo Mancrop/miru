@@ -46,27 +46,6 @@ class OfflineResourceService {
       return item;
     }).toList();
     resource.eps = [epInstance];
-    // logger.info('Send Manga Download Job: $resource');
-    // for (var item in resource.items) {
-    //   logger.info('Send Manga Download Job: ${item.title} ${item.url}');
-    // }
-    // logger.info("package: $package");
-    // final runtime = ExtensionUtils.runtimes[package]!;
-    // for (var item in resource.eps[0].items) {
-    //   final watchData = await runtime.watch(item.url) as ExtensionMangaWatch;
-    //   final path = p.join(resource.path, item.subPath);
-    //   Directory(path).createSync(recursive: true);
-    //   for (var (idx, pageUrl) in watchData.urls.indexed) {
-    //     logger.info('servie pageUrl: $pageUrl, headers: ${watchData.headers}');
-    //     final res = await Dio().get(pageUrl,
-    //         options: Options(
-    //             responseType: ResponseType.bytes, headers: watchData.headers));
-    //     final picType = getImageType(res.data).extension;
-    //     final picPath = p.join(path, '$idx$picType');
-    //     File(picPath).writeAsBytes(res.data);
-    //   }
-    // }
-    // logger.info('Send Manga Download Job: $resource');
     downloadManager.addDownload(resource);
   }
 }
