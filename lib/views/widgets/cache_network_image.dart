@@ -24,6 +24,7 @@ class CacheNetWorkImagePic extends StatelessWidget {
     this.placeholder,
     this.canFullScreen = false,
     this.mode = ExtendedImageMode.none,
+    this.useOfflineResource = false,
   });
   final String url;
   final BoxFit fit;
@@ -34,6 +35,7 @@ class CacheNetWorkImagePic extends StatelessWidget {
   final bool canFullScreen;
   final Widget? placeholder;
   final ExtendedImageMode mode;
+  final bool useOfflineResource;
 
   _errorBuild() {
     if (fallback != null) {
@@ -44,25 +46,46 @@ class CacheNetWorkImagePic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = ExtendedImage.network(
-      url,
-      headers: headers,
-      fit: fit,
-      width: width,
-      height: height,
-      cache: true,
-      mode: mode,
-      loadStateChanged: (state) {
-        switch (state.extendedImageLoadState) {
-          case LoadState.loading:
-            return placeholder ?? const SizedBox();
-          case LoadState.completed:
-            return state.completedWidget;
-          case LoadState.failed:
-            return _errorBuild();
-        }
-      },
-    );
+    late Widget image;
+    if (!useOfflineResource) {
+      image = ExtendedImage.network(
+        url,
+        headers: headers,
+        fit: fit,
+        width: width,
+        height: height,
+        cache: true,
+        mode: mode,
+        loadStateChanged: (state) {
+          switch (state.extendedImageLoadState) {
+            case LoadState.loading:
+              return placeholder ?? const SizedBox();
+            case LoadState.completed:
+              return state.completedWidget;
+            case LoadState.failed:
+              return _errorBuild();
+          }
+        },
+      );
+    } else {
+      image = ExtendedImage.file(
+        File(url),
+        fit: fit,
+        width: width,
+        height: height,
+        mode: mode,
+        loadStateChanged: (state) {
+          switch (state.extendedImageLoadState) {
+            case LoadState.loading:
+              return placeholder ?? const SizedBox();
+            case LoadState.completed:
+              return state.completedWidget;
+            case LoadState.failed:
+              return _errorBuild();
+          }
+        },
+      );
+    }
 
     if (canFullScreen) {
       return MouseRegion(
