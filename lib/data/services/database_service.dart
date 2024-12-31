@@ -122,7 +122,8 @@ class DatabaseService {
     return db.downloadJobs.where().findAll();
   }
 
-  static Future<Id> putDownloadJobsById(int jobId, DownloadJob downloadJob) async {
+  static Future<Id> putDownloadJobsById(
+      int jobId, DownloadJob downloadJob) async {
     return db.writeTxn(() => db.downloadJobs.putByIndex('jobId', downloadJob));
   }
 
@@ -137,7 +138,6 @@ class DatabaseService {
   static Future<void> deleteAllDownloadJobs() async {
     return db.writeTxn(() => db.downloadJobs.where().deleteAll());
   }
-
 
   // 扩展设置
   // 获取扩展设置
@@ -257,6 +257,7 @@ class DatabaseService {
     ExtensionDetail extensionDetail, {
     int? tmdbID,
     String? anilistID,
+    String offlineResourceJson = '{}',
   }) {
     return db.writeTxn(
       () => db.miruDetails.putByIndex(
@@ -266,7 +267,8 @@ class DatabaseService {
           ..package = package
           ..tmdbID = tmdbID
           ..url = url
-          ..aniListID = anilistID,
+          ..aniListID = anilistID
+          ..offlineResourceJson = offlineResourceJson,
       ),
     );
   }
@@ -282,6 +284,28 @@ class DatabaseService {
         .and()
         .urlEqualTo(url)
         .findFirst();
+  }
+
+  static Future<MiruDetail?> getMiruDetailByInstance(
+    MiruDetail miruDetail,
+  ) async {
+    return await db.miruDetails
+        .filter()
+        .packageEqualTo(miruDetail.package)
+        .and()
+        .urlEqualTo(miruDetail.url)
+        .findFirst();
+  }
+
+  // 更新 MiruDetail
+  static Future<Id> updateMiruDetail(
+    String package,
+    String url,
+    MiruDetail miruDetail,
+  ) {
+    return db.writeTxn(
+      () => db.miruDetails.putByIndex(r'package&url', miruDetail),
+    );
   }
 
   // 更新 TMDB 数据

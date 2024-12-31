@@ -276,6 +276,7 @@ class DownloadManager {
       // 更新数据库
       assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _others.add(download);
     }
     for (int i = 0; i < _queue.length; i++) {
       final download = _queue.removeLast();
@@ -283,6 +284,7 @@ class DownloadManager {
       // 更新数据库
       assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _others.add(download);
     }
     for (int i = 0; i < _paused.length; i++) {
       final download = _paused.removeLast();
@@ -290,6 +292,7 @@ class DownloadManager {
       // 更新数据库
       assert(download.downloadJob.jobId == download.id);
       DatabaseService.putDownloadJobsById(download.id, download.downloadJob);
+      _others.add(download);
     }
   }
 

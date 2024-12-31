@@ -56,6 +56,8 @@ class DetailPageController extends GetxController {
   ExtensionDetail? get detail => data.value;
   set detail(ExtensionDetail? value) => data.value = value;
 
+  String offlineResourceJsonString = '{}';
+
   TMDBDetail? get tmdbDetail => tmdb.value;
   set tmdbDetail(TMDBDetail? value) => tmdb.value = value;
 
@@ -181,8 +183,8 @@ class DetailPageController extends GetxController {
     dynamic data;
     if (Platform.isAndroid) {
       data = await Get.to(() => TMDBBinding(
-        title: detail!.title,
-      ));
+            title: detail!.title,
+          ));
     } else {
       data = await fluent.showDialog(
         context: currentContext,
@@ -204,6 +206,7 @@ class DetailPageController extends GetxController {
           jsonDecode(_miruDetail!.data),
         ),
       );
+      offlineResourceJsonString = _miruDetail!.offlineResourceJson;
       getRemoteDeatil();
     } else {
       await getRemoteDeatil();
@@ -213,13 +216,23 @@ class DetailPageController extends GetxController {
   getRemoteDeatil() async {
     try {
       detail = await runtime.value!.detail(url);
-      await DatabaseService.putMiruDetail(
-        package,
-        url,
-        detail!,
-        tmdbID: _tmdbID,
-        anilistID: aniListID.value,
-      );
+      // await DatabaseService.putMiruDetail(
+      //   package,
+      //   url,
+      //   detail!,
+      //   tmdbID: _tmdbID,
+      //   anilistID: aniListID.value,
+      //   offlineResourceJson:offlineResourceJsonString,
+      // );
+      final miruDetailToUpdate = MiruDetail()
+        ..data = jsonEncode(detail!.toJson())
+        ..package = package
+        ..tmdbID = _tmdbID
+        ..url = url
+        ..aniListID = aniListID.value
+        ..offlineResourceJson = offlineResourceJsonString;
+      _miruDetail = miruDetailToUpdate;
+      await DatabaseService.updateMiruDetail(package, url, miruDetailToUpdate);
     } catch (e) {
       // 弹出错误信息
       if (runtime.value == null) {
@@ -284,6 +297,7 @@ class DetailPageController extends GetxController {
       detail!,
       tmdbID: _tmdbID,
       anilistID: aniListID.value,
+      offlineResourceJson: offlineResourceJsonString,
     );
   }
 
@@ -293,6 +307,7 @@ class DetailPageController extends GetxController {
       url,
       detail!,
       anilistID: aniListID.value,
+      offlineResourceJson: offlineResourceJsonString,
     );
   }
 
@@ -429,6 +444,8 @@ class DetailPageController extends GetxController {
               episodeGroupId: selectEpGroup,
               detailUrl: url,
               anilistID: aniListID.value,
+              detail: _miruDetail!,
+              extensionDetail: detail!,
             ),
           );
         }),

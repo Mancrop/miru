@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
 import 'package:miru_app/data/services/extension_service.dart';
 import 'package:miru_app/models/download_job.dart';
-import 'package:miru_app/models/extension.dart';
+import 'package:miru_app/models/index.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/image_type.dart';
 import 'package:miru_app/utils/log.dart';
@@ -18,12 +19,24 @@ class MangaDownloader extends DownloadInterface {
   late String _name;
   late String _url;
   late DownloadJob _job;
+  late MiruDetail? _detail;
+  late String? detailPackage;
+  late String? detailUrl;
 
   MangaDownloader(DownloadJob job, int id) {
     _job = job;
     _name = job.resource!.title;
     _url = job.resource!.url!;
     _id = id;
+    detailPackage = job.resource?.package;
+    detailUrl = job.resource?.url;
+    if (detailPackage != null && detailUrl != null) {
+      DatabaseService.getMiruDetail(detailPackage!, detailUrl!).then((value) {
+        _detail = value;
+      });
+    } else {
+      logger.warning('Manga downloader: Resource package or url is null');
+    }
   }
 
   bool deadStatus() {
@@ -48,12 +61,6 @@ class MangaDownloader extends DownloadInterface {
   DownloaderType getDownloaderType() {
     return DownloaderType.mangaDownloader;
   }
-
-  // Future<void> pauseInternal() async {
-  //   while (status == DownloadStatus.paused || status == DownloadStatus.queued) {
-  //     await Future.delayed(Duration(seconds: 1));
-  //   }
-  // }
 
   Future<DownloadStatus> downloadInternal(
       int total, ExtensionService runtime, OfflineResource resource) async {
@@ -135,6 +142,25 @@ class MangaDownloader extends DownloadInterface {
       _status = DownloadStatus.failed;
       _job.status = _status;
       logger.warning('Download failed', e);
+    }
+    if (_status == DownloadStatus.completed) {
+      // 更新MiruDetail中的数据
+      if (_detail != null && detailPackage != null && detailUrl != null) {
+        final offlineResource = _detail!.offlineResource;
+        for (var ep in _job.resource!.eps) {
+          final epTitle = ep.title;
+          for (var item in ep.items) {
+            final itemTitle = item.title;
+            final path = p.join(_job.resource!.path, ep.subPath, item.subPath);
+            offlineResource[epTitle] ??= {};
+            offlineResource[epTitle]![itemTitle] = path;
+          }
+        }
+        _detail!.offlineResource = offlineResource;
+        await DatabaseService.updateMiruDetail(detailPackage!, detailUrl!, _detail!);
+      }
+    } else {
+      logger.warning('MangaDownloader: Download failed, update MiruDetail failed');
     }
     return _status;
   }
