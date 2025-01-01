@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/utils/miru_storage.dart';
@@ -9,13 +8,14 @@ import 'package:miru_app/data/services/download/download_manager.dart';
 final DownloadManager downloadManager = DownloadManager();
 
 class OfflineResourceService {
-  static String newDirectory(String name, ResourceType type) {
+  static Future<String> newDirectory(String name, ResourceType type) async {
     // 创建文件夹
     String sanitizedName = sanitizeFileName(name);
     String rootPath = MiruStorage.getSetting(SettingKey.downloadPath);
     String path =
         p.join(rootPath, type.toString().split('.').last, sanitizedName);
-    Directory(path).createSync(recursive: true);
+    // Directory(path).createSync(recursive: true);
+    await miruCreateFolder(path, recursive: true);
     return path;
   }
 
@@ -30,7 +30,7 @@ class OfflineResourceService {
     resource.title = details.title;
     resource.cover = details.cover;
     resource.path =
-        newDirectory('$package ${details.title}', ResourceType.manga);
+        await newDirectory('$package ${details.title}', ResourceType.manga);
     final episodes = details.episodes ?? [];
     final curEp = episodes[ep];
     final epInstance = Ep()

@@ -10,6 +10,7 @@ import 'package:miru_app/models/index.dart';
 import 'package:miru_app/utils/extension.dart';
 import 'package:miru_app/utils/image_type.dart';
 import 'package:miru_app/utils/log.dart';
+import 'package:miru_app/utils/path_utils.dart';
 import 'package:path/path.dart' as p;
 
 class MangaDownloader extends DownloadInterface {
@@ -77,7 +78,8 @@ class MangaDownloader extends DownloadInterface {
         _progress = count / total;
         final path = p.join(resource.path, eps.subPath, item.subPath);
         final watchData = await runtime.watch(item.url) as ExtensionMangaWatch;
-        Directory(path).createSync(recursive: true);
+        // Directory(path).createSync(recursive: true);
+        await miruCreateFolder(path, recursive: true);
 
         // 获取目录中的所有文件
         final existingFiles =

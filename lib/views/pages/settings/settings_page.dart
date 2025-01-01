@@ -7,8 +7,11 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/data/providers/tmdb_provider.dart';
 import 'package:miru_app/controllers/application_controller.dart';
+import 'package:miru_app/data/services/database_service.dart';
+import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/router/router.dart';
 import 'package:miru_app/utils/log.dart';
+import 'package:miru_app/utils/path_utils.dart';
 import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/views/dialogs/bt_dialog.dart';
 import 'package:miru_app/controllers/extension/extension_repo_controller.dart';
@@ -30,7 +33,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as p;
-import 'package:miru_app/utils/android_permission.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -45,12 +47,26 @@ class _SettingsPageState extends State<SettingsPage> {
   final downloadPathController = TextEditingController(
       text: MiruStorage.getSetting(SettingKey.downloadPath));
 
-  void _updateDownloadPath(String newPath) {
+  Future<void> _updateDownloadPath(String newPath) async {
+    if (newPath == downloadPath) {
+      return;
+    }
+    if (!await miruCreateFolder(newPath)) {
+      logger.warning('SettingsPage: Failed to create folder: $newPath');
+      return;
+    }
     setState(() {
       downloadPath = newPath;
     });
     MiruStorage.setSetting(SettingKey.downloadPath, newPath);
     downloadPathController.text = newPath;
+    if (Platform.isAndroid) {
+      final nomedia = p.join(newPath, '.nomedia');
+      await miruCreatePath(nomedia, recursive: true);
+    }
+    // 更新一下内部的数据库
+    DownloadManager().cancelAll();
+    DatabaseService.clearAllMiruDetailOfflineResourceJson();
   }
 
   @override
@@ -444,15 +460,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       var path = await FilePicker.platform.getDirectoryPath();
                       if (path != null) {
                         String newPath = p.join(path, 'Miru');
-                        if (await requestStoragePermissions()) {
-                          MiruStorage.setSetting(
-                              SettingKey.downloadPath, newPath);
-                          // 在这个文件夹下创建.nomedia文件
-                          final noMediaFile = File(p.join(newPath, '.nomedia'));
-                          if (!noMediaFile.existsSync()) {
-                            noMediaFile.createSync(recursive: true);
-                          }
-                        }
+                        await _updateDownloadPath(newPath);
                       }
                     },
                     child: Text('settings.download-path-select'.i18n),

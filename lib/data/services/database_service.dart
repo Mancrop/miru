@@ -308,6 +308,21 @@ class DatabaseService {
     );
   }
 
+  // 获取所有 MiruDetail
+  static Future<List<MiruDetail>> getAllMiruDetail() async {
+    return db.miruDetails.where().findAll();
+  }
+
+  // 将所有 MiruDetail 的 offlineResourceJson 字段置空
+  static Future<void> clearAllMiruDetailOfflineResourceJson() async {
+    // 先获取再逐个更新
+    final miruDetails = await db.miruDetails.where().findAll();
+    for (final miruDetail in miruDetails) {
+      miruDetail.offlineResourceJson = '{}';
+      await db.writeTxn(() => db.miruDetails.put(miruDetail));
+    }
+  }
+
   // 更新 TMDB 数据
   static Future<Id> putTMDBDetail(
     int tmdbID,

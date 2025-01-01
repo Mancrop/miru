@@ -1,7 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
 
-Future<bool> requestStoragePermissions() async {
+Future<bool> requestFullStoragePermissions() async {
   var status = await Permission.storage.status;
   if (!status.isGranted) {
     status = await Permission.storage.request();
@@ -13,4 +13,12 @@ Future<bool> requestStoragePermissions() async {
     openAppSettings();
   }
   return status.isGranted && status1.isGranted;
+}
+
+Future<bool> requestBasicStoragePermissions() async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    status = await Permission.storage.request();
+  }
+  return status.isGranted;
 }

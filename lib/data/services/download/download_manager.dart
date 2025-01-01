@@ -11,6 +11,7 @@ import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/data/services/database_service.dart';
+import 'package:miru_app/utils/path_utils.dart';
 
 class IdPool {
   final Set<int> _usedIds = {};
@@ -98,7 +99,10 @@ class DownloadManager {
     return _instance;
   }
 
-  static void init() {
+  static Future<void> init() async {
+    final downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
+    await miruCreateFolder(downloadPath, recursive: true);
+
     var cnt = 0;
     // 从数据库中加载下载任务
     DatabaseService.getDownloadJobs().then((jobs) {

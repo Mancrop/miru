@@ -2,8 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/detail_controller.dart';
+import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
 import 'package:miru_app/router/router.dart';
-import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/views/dialogs/download_picker_dialog.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
@@ -38,7 +38,7 @@ class _DetailDownloadButtonState extends State<DetailDownloadButton> {
         return IconButton(
           onPressed: () async {
             c.changeDownloadSelectorState();
-            if (await requestStoragePermissions()) {
+            // if (await requestBasicStoragePermissions()) {
               final toDownload = <int>[];
               for (var i = 0;
                   i < isSelected[c.selectEpGroup.value].length;
@@ -49,7 +49,7 @@ class _DetailDownloadButtonState extends State<DetailDownloadButton> {
                 }
               }
               c.download(toDownload);
-            }
+            // }
           },
           icon: const Icon(fluent.FluentIcons.check_mark),
         );
