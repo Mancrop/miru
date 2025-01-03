@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
     downloadPathController.text = newPath;
     if (Platform.isAndroid) {
       final nomedia = p.join(newPath, '.nomedia');
-      await miruCreatePath(nomedia, recursive: true);
+      await miruCreateFile(nomedia, recursive: true);
     }
     // 更新一下内部的数据库
     DownloadManager().cancelAll();

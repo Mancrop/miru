@@ -12,6 +12,7 @@ import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/utils/path_utils.dart';
+import 'package:path/path.dart' as p;
 
 class IdPool {
   final Set<int> _usedIds = {};
@@ -101,7 +102,11 @@ class DownloadManager {
 
   static Future<void> init() async {
     final downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
+    final nomediaPath = p.join(downloadPath, '.nomedia');
     await miruCreateFolder(downloadPath, recursive: true);
+    if (Platform.isAndroid) {
+      await miruCreateFile(nomediaPath);
+    }
 
     var cnt = 0;
     // 从数据库中加载下载任务

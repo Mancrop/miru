@@ -109,7 +109,7 @@ Future<bool> miruCreateFolder(String folder, {bool recursive = true}) async {
 }
 
 // 需要在ui界面显示后调用，因此有些地方应使用原始的createSync方法
-Future<bool> miruCreatePath(String path, {bool recursive = true}) async {
+Future<bool> miruCreateFile(String path, {bool recursive = true}) async {
   try {
     // 主要是为了避免在安卓中创建文件没有权限的问题
     final file = File(path);
@@ -140,7 +140,7 @@ Future<bool> miruCreatePath(String path, {bool recursive = true}) async {
       return true;
     }
   } catch (e) {
-    logger.warning('miruCreatePath error: $e');
+    logger.warning('miruCreateFile error: $e');
     return false;
   }
 }
