@@ -34,33 +34,33 @@ jobs:
         run: |
           echo $ENCODED_KEYSTORE | base64 -di > android/app/keystore.jks
         env:
-          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE }}
+          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_DEV }}
 
       - run: flutter pub get
       # 打包apk
       - name: Collect Apks
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --flavor dev --release --split-per-abi
         env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD}}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD_DEV }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS_DEV }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD_DEV}}
 
       # 发布安装包
       - name: Upload Artifact - armeabi-v7a
         uses: actions/upload-artifact@v3
         with:
-          path: "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-          name: Miru-pr-${{ github.event.pull_request.number }}-armeabi-v7a.apk
+          path: "build/app/outputs/flutter-apk/app-armeabi-v7a-dev-release.apk"
+          name: Miru-pullrequest${{ github.event.pull_request.number }}-armeabi-v7a.apk
       - name: Upload Artifact - arm64-v8a
         uses: actions/upload-artifact@v3
         with:
-          path: "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
-          name: Miru-pr-${{ github.event.pull_request.number }}-arm64-v8a.apk
+          path: "build/app/outputs/flutter-apk/app-arm64-v8a-dev-release.apk"
+          name: Miru-pullrequest${{ github.event.pull_request.number }}-arm64-v8a.apk
       - name: Upload Artifact - x86
         uses: actions/upload-artifact@v3
         with:
-          path: "build/app/outputs/flutter-apk/app-x86_64-release.apk"
-          name: Miru-pr-${{ github.event.pull_request.number }}-x86_64.apk
+          path: "build/app/outputs/flutter-apk/app-x86_64-dev-release.apk"
+          name: Miru-pullrequest${{ github.event.pull_request.number }}-x86_64.apk
 
   build-and-release-windows:
     runs-on: windows-latest

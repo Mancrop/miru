@@ -84,6 +84,9 @@ android {
         //     v1SigningEnabled = true
         //     v2SigningEnabled = true
         // }
+        dev {
+
+        }
     }
     
     buildTypes {
@@ -103,6 +106,14 @@ android {
         //     // Signing with the debug keys for now, so `flutter run --release` works.
         //     signingConfig = signingConfigs.debug
         // }
+    }
+    flavorDimensions "mode"
+    productFlavors {
+        dev {
+            dimension "mode"
+            applicationId "miru.miaomint.dev" // 开发版本包名
+            versionNameSuffix "-dev" // 可选，用于版本名后缀
+        }
     }
 }
 
