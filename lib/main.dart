@@ -11,6 +11,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
+import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_directory.dart';
 import 'package:miru_app/utils/request.dart';
@@ -22,7 +23,6 @@ import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/utils/application.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main(List<String> args) async {

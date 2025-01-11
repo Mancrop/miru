@@ -101,12 +101,12 @@ class DownloadManager {
   }
 
   static Future<void> init() async {
-    final downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
-    final nomediaPath = p.join(downloadPath, '.nomedia');
-    await miruCreateFolder(downloadPath, recursive: true);
-    if (Platform.isAndroid) {
-      await miruCreateFile(nomediaPath);
-    }
+    // final downloadPath = MiruStorage.getSetting(SettingKey.downloadPath);
+    // final nomediaPath = p.join(downloadPath, '.nomedia');
+    // await miruCreateFolder(downloadPath, recursive: true);
+    // if (Platform.isAndroid) {
+    //   await miruCreateFile(nomediaPath);
+    // }
 
     var cnt = 0;
     // 从数据库中加载下载任务

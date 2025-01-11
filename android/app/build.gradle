@@ -61,8 +61,8 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion = 21
-        // Cannot be changed or bt-server will not start.
-        targetSdkVersion = 28
+        // Cannot be changed or bt-server will not start. Default is 28.
+        targetSdkVersion = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -84,9 +84,6 @@ android {
         //     v1SigningEnabled = true
         //     v2SigningEnabled = true
         // }
-        dev {
-
-        }
     }
     
     buildTypes {
@@ -113,6 +110,12 @@ android {
             dimension "mode"
             applicationId "miru.miaomint.dev" // 开发版本包名
             versionNameSuffix "-dev" // 可选，用于版本名后缀
+        }
+
+        prod {
+            dimension "mode"
+            applicationId "miru.miaomint" // 生产版本包名
+            versionNameSuffix "" // 可选，用于版本名后缀
         }
     }
 }

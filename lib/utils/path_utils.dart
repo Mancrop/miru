@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
-import 'package:miru_app/utils/miru_directory.dart';
-import 'package:path/path.dart' as path;
+// import 'package:media_store_plus/media_store_plus.dart' as m;
 
 String sanitizeFileName(String fileName) {
   // 移除或替换不允许的字符
@@ -62,46 +60,14 @@ Future<List<String>> getSortedFiles(String directoryPath,
   return files.map((file) => file.path).toList();
 }
 
-String getMediaFolderPath() {
-  late String dirPath;
-
-  if (Platform.isAndroid) {
-    // 在安卓中采用DCIM进行储存
-    dirPath = path.join('/storage/emulated/0/Documents', 'Miru');
-  } else {
-    dirPath = path.join(MiruDirectory.getDirectory, 'download');
-  }
-
-  return dirPath;
-}
-
 // 需要在ui界面显示后调用，因此有些地方应使用原始的createSync方法
 Future<bool> miruCreateFolder(String folder, {bool recursive = true}) async {
   try {
-    // 主要是为了避免在安卓中创建文件夹没有权限的问题
-    if (Platform.isAndroid) {
-      // 检测folder是否是外部存储的子文件夹，而且不是DCIM的子文件夹
-      if (folder.startsWith('/storage/emulated/0')) {
-        await requestFullStoragePermissions();
-        if (Directory(folder).existsSync()) {
-          return true;
-        }
-        Directory(folder).createSync(recursive: recursive);
-        return true;
-      }
-      // 检测是否是内部存储的子文件夹
-      if (folder.startsWith(MiruDirectory.getDirectory)) {
-        if (Directory(folder).existsSync()) {
-          return true;
-        }
-        Directory(folder).createSync(recursive: recursive);
-        return true;
-      }
-      throw Exception('Can not create folder: $folder');
-    } else {
-      Directory(folder).createSync(recursive: recursive);
+    if (Directory(folder).existsSync()) {
       return true;
     }
+    Directory(folder).createSync(recursive: recursive);
+    return true;
   } catch (e) {
     logger.warning('miruCreateFolder error: $e');
     return false;
@@ -113,32 +79,12 @@ Future<bool> miruCreateFile(String path, {bool recursive = true}) async {
   try {
     // 主要是为了避免在安卓中创建文件没有权限的问题
     final file = File(path);
-    if (Platform.isAndroid) {
-      // 检测path是否是外部存储的子文件夹，而且不是DCIM的子文件夹
-      if (path.startsWith('/storage/emulated/0')) {
-        await requestFullStoragePermissions();
-        if (file.existsSync()) {
-          return true;
-        }
-        file.createSync(recursive: recursive);
-        return true;
-      }
-      // 检测是否是内部存储的子文件夹
-      if (path.startsWith(MiruDirectory.getDirectory)) {
-        if (file.existsSync()) {
-          return true;
-        }
-        file.createSync(recursive: recursive);
-        return true;
-      }
-      throw Exception('Can not create file: $path');
-    } else {
-      if (file.existsSync()) {
-        return true;
-      }
-      file.createSync(recursive: recursive);
+
+    if (file.existsSync()) {
       return true;
     }
+    file.createSync(recursive: recursive);
+    return true;
   } catch (e) {
     logger.warning('miruCreateFile error: $e');
     return false;

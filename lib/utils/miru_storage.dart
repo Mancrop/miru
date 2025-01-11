@@ -7,7 +7,6 @@ import 'package:isar/isar.dart';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/index.dart';
 import 'package:miru_app/utils/miru_directory.dart';
-import 'package:miru_app/utils/path_utils.dart';
 import 'package:path/path.dart' as p;
 
 class MiruStorage {
@@ -139,8 +138,13 @@ class MiruStorage {
     await _initSetting(SettingKey.subtitleBackgroundOpacity, 0.5);
     await _initSetting(SettingKey.subtitleTextAlign, TextAlign.center.index);
 
-    await _initSetting(SettingKey.downloadPath, getMediaFolderPath());
+    await _initSetting(SettingKey.downloadPath, null);
     await _initSetting(SettingKey.downloadMaxTasks, 3);
+
+    await _initSetting(SettingKey.firstTimeSetup, true);
+    await _initSetting(SettingKey.isNotificationGranted, false);
+    await _initSetting(SettingKey.isStorageGranted, false);
+
   }
 
   static _initSetting(String key, dynamic value) async {
@@ -209,5 +213,9 @@ class SettingKey {
   static const subtitleLastTitleSelected = "SubtitleLastTitleSelected";
   // Setting for downloader
   static const downloadPath = "DownloadPath";
-  static const downloadMaxTasks = "downloadMaxTasks";
+  static const downloadMaxTasks = "DownloadMaxTasks";
+  // first time setup tag
+  static const firstTimeSetup = "FirstTimeSetup";
+  static const isNotificationGranted = "IsNotificationGranted";
+  static const isStorageGranted = "IsStorageGranted";
 }

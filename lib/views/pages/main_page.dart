@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:miru_app/utils/log.dart';
+import 'package:miru_app/views/pages/android_welcome_page.dart';
 import 'package:miru_app/views/pages/extension/extension_page.dart';
 import 'package:miru_app/views/pages/home_page.dart';
 import 'package:miru_app/controllers/main_controller.dart';
@@ -196,6 +200,14 @@ class _AndroidMainPageState extends fluent.State<AndroidMainPage> {
   @override
   void initState() {
     c = Get.put(MainController());
+    logger.info("${MiruStorage.getSetting(SettingKey.firstTimeSetup)}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.to(() => const AndroidWelcomePage());
+      if (MiruStorage.getSetting(SettingKey.firstTimeSetup)) {
+        Get.to(() => const AndroidWelcomePage());
+        MiruStorage.setSetting(SettingKey.firstTimeSetup, false);
+      }
+    });
     if (MiruStorage.getSetting(SettingKey.autoCheckUpdate)) {
       ApplicationUtils.checkUpdate(context);
     }

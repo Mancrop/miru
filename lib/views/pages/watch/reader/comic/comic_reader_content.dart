@@ -6,13 +6,10 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:miru_app/models/index.dart';
 import 'package:miru_app/controllers/watch/comic_controller.dart';
 import 'package:miru_app/utils/i18n.dart';
-import 'package:miru_app/utils/log.dart';
-import 'package:miru_app/utils/miru_directory.dart';
 import 'package:miru_app/views/widgets/button.dart';
 import 'package:miru_app/views/widgets/cache_network_image.dart';
 import 'package:miru_app/views/widgets/platform_widget.dart';
 import 'package:miru_app/views/widgets/progress.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:extended_image/extended_image.dart';
 

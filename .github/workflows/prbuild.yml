@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: "build/windows/x64/runner/Miru-App"
-          name: Miru-pr-${{ github.event.pull_request.number }}-windows.zip
+          name: Miru-pullrequest${{ github.event.pull_request.number }}-windows.zip
 
   build-and-release-linux:
     runs-on: ubuntu-latest
@@ -107,4 +107,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: "build/linux/x64/release/Miru-App"
-          name: Miru-pr-${{ github.event.pull_request.number }}-linux.zip
+          name: Miru-pullrequest${{ github.event.pull_request.number }}-linux.zip
