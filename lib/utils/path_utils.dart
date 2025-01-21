@@ -1,6 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:miru_app/utils/log.dart';
-// import 'package:media_store_plus/media_store_plus.dart' as m;
+import 'package:path/path.dart' as p;
+import 'package:saf_stream/saf_stream.dart';
+import 'package:uri_to_file/uri_to_file.dart';
+
+final _saf = SafStream();
 
 String sanitizeFileName(String fileName) {
   // 移除或替换不允许的字符
@@ -60,7 +65,7 @@ Future<List<String>> getSortedFiles(String directoryPath,
   return files.map((file) => file.path).toList();
 }
 
-// 需要在ui界面显示后调用，因此有些地方应使用原始的createSync方法
+// 需要在ui界面显示后调用
 Future<bool> miruCreateFolder(String folder, {bool recursive = true}) async {
   try {
     if (Directory(folder).existsSync()) {
@@ -74,19 +79,61 @@ Future<bool> miruCreateFolder(String folder, {bool recursive = true}) async {
   }
 }
 
-// 需要在ui界面显示后调用，因此有些地方应使用原始的createSync方法
+// 需要在ui界面显示后调用
 Future<bool> miruCreateFile(String path, {bool recursive = true}) async {
   try {
-    // 主要是为了避免在安卓中创建文件没有权限的问题
-    final file = File(path);
-
-    if (file.existsSync()) {
-      return true;
+    if (!Platform.isAndroid) {
+      if (File(path).existsSync()) {
+        return true;
+      }
+      File(path).createSync(recursive: recursive);
+    } else {
+      // 使用SAF对安卓文件进行读写
+      // 在安卓中使用uri
     }
-    file.createSync(recursive: recursive);
     return true;
   } catch (e) {
     logger.warning('miruCreateFile error: $e');
     return false;
   }
+}
+
+Future<Uint8List> miruReadFileBytes(String path) async {
+  // 用于读取外部文件（特指安卓/苹果）
+  // 返回字节流
+  if (!Platform.isAndroid) {
+    return File(path).readAsBytesSync();
+  } else {
+    return _saf.readFileBytes(path);
+  }
+}
+
+Future<File> miruGetFile(String path) async {
+  if (!Platform.isAndroid) {
+    return File(path);
+  } else {
+    return await toFile(path);
+  }
+}
+
+Future<bool> miruWriteFileBytes(String treePath, String fileName, Uint8List bytes) async {
+  final path = p.join(treePath, fileName);
+  // 用于写入外部文件（特指安卓/苹果）
+  if (!Platform.isAndroid) {
+    File(path).writeAsBytesSync(bytes);
+    return true;
+  } else {
+    try {
+      _saf.writeFileBytes(treePath, fileName, 'application/octet-stream', bytes);
+      return true;
+    } catch (e) {
+      logger.warning('miruWriteFileBytes error: $e');
+      return false;
+    }
+  }
+}
+
+(String, String) miruSplitPath(String path) {
+  final split = p.split(path);
+  return (p.joinAll(split.sublist(0, split.length - 1)), split.last);
 }

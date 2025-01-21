@@ -1198,6 +1198,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  saf_stream:
+    dependency: "direct main"
+    description:
+      name: saf_stream
+      sha256: f9258bc3b39256e0af3de7c05a70a4c7ac846d186a3ea8c1e5bef7b53876c566
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.1"
+  saf_util:
+    dependency: "direct main"
+    description:
+      name: saf_util
+      sha256: "4e07d11463a97cd3feecb66192e423e6d17f082f16f1acf2ce923a538cacced0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.2"
   safe_local_storage:
     dependency: transitive
     description:
@@ -1587,6 +1603,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  uri_to_file:
+    dependency: "direct main"
+    description:
+      name: uri_to_file
+      sha256: cbbb38f975d22311efacc9a53cdcb806708606666d8092314b81c5cb7983b700
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   url_launcher:
     dependency: "direct main"
     description:
