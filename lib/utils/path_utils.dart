@@ -1,11 +1,13 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:miru_app/utils/log.dart';
 import 'package:path/path.dart' as p;
 import 'package:saf_stream/saf_stream.dart';
+import 'package:saf_util/saf_util.dart';
 import 'package:uri_to_file/uri_to_file.dart';
+import 'package:flutter/services.dart';
 
 final _saf = SafStream();
+final _safUtils = SafUtil();
 
 String sanitizeFileName(String fileName) {
   // 移除或替换不允许的字符
@@ -65,36 +67,81 @@ Future<List<String>> getSortedFiles(String directoryPath,
   return files.map((file) => file.path).toList();
 }
 
+Future<String?> pickDir(
+    {bool writePermission = true, bool persistablePermission = true}) async {
+  assert(Platform.isAndroid);
+  final res = await _safUtils.pickDirectory(
+      writePermission: writePermission,
+      persistablePermission: persistablePermission);
+  return res?.uri.toString();
+}
+
 // 需要在ui界面显示后调用
-Future<bool> miruCreateFolder(String folder, {bool recursive = true}) async {
+Future<String?> miruCreateFolder(String folder, {bool recursive = true}) async {
   try {
     if (Directory(folder).existsSync()) {
-      return true;
+      return folder;
     }
     Directory(folder).createSync(recursive: recursive);
-    return true;
+    return folder;
   } catch (e) {
     logger.warning('miruCreateFolder error: $e');
-    return false;
+    return null;
+  }
+}
+
+Future<String?> miruCreateFolderInTree(String treePath, String folder,
+    {bool recursive = true}) async {
+  try {
+    final path = p.join(treePath, folder);
+    if (!Platform.isAndroid) {
+      if (Directory(path).existsSync()) {
+        return path;
+      }
+      Directory(path).createSync(recursive: recursive);
+      return path;
+    } else {
+      // 使用SAF对安卓文件进行读写
+      // 在安卓中使用uri
+      final res = await _safUtils.mkdirp(treePath, [folder]);
+      logger.info('uri: ${res.uri}');
+      return res.uri.toString();
+    }
+  } catch (e) {
+    logger.warning('miruCreateFolderInTree error: $e');
+    return null;
   }
 }
 
 // 需要在ui界面显示后调用
-Future<bool> miruCreateFile(String path, {bool recursive = true}) async {
+Future<String?> miruCreateEmptyFile(String treePath, String fileName,
+    {bool overwrite = false}) async {
   try {
+    final path = p.join(treePath, fileName);
     if (!Platform.isAndroid) {
       if (File(path).existsSync()) {
-        return true;
+        return path;
       }
-      File(path).createSync(recursive: recursive);
+      File(path).createSync(recursive: true);
+      return path;
     } else {
       // 使用SAF对安卓文件进行读写
       // 在安卓中使用uri
+      final isExist = await miruFileExist(treePath, fileName);
+      if (isExist && !overwrite) {
+        logger.warning(
+            'miruCreateEmptyFile: File Already Exists, cannot return a specific uri in android');
+        return 'File Already Exists';
+      }
+      final res = await _saf.writeFileBytes(
+          treePath, fileName, 'application/octet-stream', Uint8List(0),
+          overwrite: overwrite);
+      logger.info('uri: ${res.uri}');
+      return res.uri.toString();
     }
-    return true;
   } catch (e) {
     logger.warning('miruCreateFile error: $e');
-    return false;
+    return null;
   }
 }
 
@@ -116,19 +163,47 @@ Future<File> miruGetFile(String path) async {
   }
 }
 
-Future<bool> miruWriteFileBytes(String treePath, String fileName, Uint8List bytes) async {
+Future<bool> miruFileExist(String treePath, String fileName) async {
+  final path = p.join(treePath, fileName);
+  try {
+    if (!Platform.isAndroid) {
+      return File(path).existsSync();
+    } else {
+      final fileList = await _safUtils.child(treePath, [fileName]);
+      if (fileList != null) {
+        return true;
+      }
+      return false;
+    }
+  } catch (e) {
+    logger.warning('miruFileExist: $e');
+    return false;
+  }
+}
+
+Future<String?> miruWriteFileBytes(
+    String treePath, String fileName, Uint8List bytes,
+    {bool overwrite = false}) async {
   final path = p.join(treePath, fileName);
   // 用于写入外部文件（特指安卓/苹果）
   if (!Platform.isAndroid) {
     File(path).writeAsBytesSync(bytes);
-    return true;
+    return path;
   } else {
     try {
-      _saf.writeFileBytes(treePath, fileName, 'application/octet-stream', bytes);
-      return true;
+      final fileList = await _safUtils.child(treePath, [fileName]);
+      if (fileList != null && !overwrite) {
+        logger.warning(
+            'miruWriteFileBytes: File Already Exists, cannot return a specific uri in android');
+        return 'File Already Exists';
+      }
+      final res = await _saf.writeFileBytes(
+          treePath, fileName, 'application/octet-stream', bytes,
+          overwrite: overwrite);
+      return res.uri.toString();
     } catch (e) {
       logger.warning('miruWriteFileBytes error: $e');
-      return false;
+      return null;
     }
   }
 }
@@ -136,4 +211,36 @@ Future<bool> miruWriteFileBytes(String treePath, String fileName, Uint8List byte
 (String, String) miruSplitPath(String path) {
   final split = p.split(path);
   return (p.joinAll(split.sublist(0, split.length - 1)), split.last);
+}
+
+Future<String?> getPathFromUri(String uri) async {
+  const platform = MethodChannel('UTILS'); // 定义一个唯一的通道名称
+  final String? path =
+      await platform.invokeMethod('getPathFromUri', {'uri': uri});
+  return path;
+}
+
+Future<bool> miruCheckUriPersisted(String uri) async {
+  assert(Platform.isAndroid);
+  try {
+    const platform = MethodChannel('UTILS');
+    return await platform.invokeMethod('checkUriPersisted', {'uri': uri});
+  } catch (e) {
+    logger.warning('miruCheckPersisted error: $e');
+    return false;
+  }
+}
+
+Future<String?> miruGetActualPath(String path) async {
+  if (Platform.isAndroid) {
+    // 如果传入的uri不是一个有效的uri（运行中创建或者持久的），会造成难以理解的问题
+    try {
+      return await getPathFromUri(path);
+    } catch (e) {
+      logger.warning('getActualFolderPath error: $e');
+      return null;
+    }
+  } else {
+    return path;
+  }
 }

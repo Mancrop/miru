@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/data/services/database_service.dart';
@@ -8,7 +7,6 @@ import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/utils/path_utils.dart';
-import 'package:path/path.dart' as p;
 
 class AndroidWelcomePage extends StatefulWidget {
   const AndroidWelcomePage({super.key});
@@ -106,6 +104,20 @@ class _WelcomeSettingPage extends State<WelcomeSettingPage> {
   var isNotiGranted = MiruStorage.getSetting('IsNotificationGranted');
   var isStorageGranted = MiruStorage.getSetting('IsStorageGranted');
   var downloadPath = MiruStorage.getSetting('DownloadPath');
+  var selectedPath = '';
+
+  Future<void> loadSelectedPath() async {
+    final path = await miruGetActualPath(downloadPath) ?? '';
+    setState(() {
+      selectedPath = path;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadSelectedPath();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +168,7 @@ class _WelcomeSettingPage extends State<WelcomeSettingPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Selected folder: ${downloadPath ?? 'Not selected'}',
+                          'Selected folder: ${selectedPath == '' ? 'Not selected': selectedPath}',
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                         SizedBox(height: 16),
@@ -166,21 +178,30 @@ class _WelcomeSettingPage extends State<WelcomeSettingPage> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () async {
-                              await requestBasicStoragePermissions();
                               var newPath =
-                                  await FilePicker.platform.getDirectoryPath();
+                                  await pickDir(writePermission: true);
                               if (newPath == null || newPath == downloadPath) {
                                 return;
                               }
-                              final nomedia = p.join(newPath, '.nomedia');
-                              await miruCreateFile(nomedia, recursive: true);
+                              final folderUri = await miruCreateFolderInTree(newPath, 'Miru');
+                              if (folderUri == null) {
+                                return;
+                              }
+                              logger.info('persistent: ${await miruCheckUriPersisted(folderUri)}');
+                              final folderPath = await miruGetActualPath(folderUri);
+                              if (folderPath == null) {
+                                logger.warning('Welcome Page: Failed to get folder path');
+                                return;
+                              }
+                              await miruCreateEmptyFile(folderUri, '.nomedia');
+                              selectedPath = folderPath;
                               // 更新一下内部数据库
                               DownloadManager().cancelAll();
                               DatabaseService
                                   .clearAllMiruDetailOfflineResourceJson();
-                              MiruStorage.setSetting('DownloadPath', newPath);
+                              MiruStorage.setSetting('DownloadPath', folderUri);
                               setState(() {
-                                downloadPath = newPath;
+                                downloadPath = folderPath;
                               });
                             },
                             child: Text('Select a folder',

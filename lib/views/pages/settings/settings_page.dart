@@ -51,7 +51,8 @@ class _SettingsPageState extends State<SettingsPage> {
     if (newPath == downloadPath) {
       return;
     }
-    if (!await miruCreateFolder(newPath)) {
+    final temp = miruSplitPath(newPath);
+    if (await miruCreateFolderInTree(temp.$1, temp.$2) == null) {
       logger.warning('SettingsPage: Failed to create folder: $newPath');
       return;
     }
@@ -59,10 +60,9 @@ class _SettingsPageState extends State<SettingsPage> {
       downloadPath = newPath;
     });
     MiruStorage.setSetting(SettingKey.downloadPath, newPath);
-    downloadPathController.text = newPath;
+    downloadPathController.text = await miruGetActualPath(newPath) ?? newPath;
     if (Platform.isAndroid) {
-      final nomedia = p.join(newPath, '.nomedia');
-      await miruCreateFile(nomedia, recursive: true);
+      await miruCreateEmptyFile(newPath, '.nomedia');
     }
     // 更新一下内部的数据库
     DownloadManager().cancelAll();

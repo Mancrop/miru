@@ -11,7 +11,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
-import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_directory.dart';
 import 'package:miru_app/utils/request.dart';
