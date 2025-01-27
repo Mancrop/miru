@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/data/services/database_service.dart';
@@ -76,14 +74,13 @@ class MangaDownloader extends DownloadInterface {
           await Future.delayed(Duration(seconds: 1));
         }
         _progress = count / total;
-        final path = p.join(resource.path, eps.subPath, item.subPath);
+        // final path = p.join(resource.path, eps.subPath, item.subPath);
         final watchData = await runtime.watch(item.url) as ExtensionMangaWatch;
-        // Directory(path).createSync(recursive: true);
-        await miruCreateFolder(path, recursive: true);
+        final curPath = await miruCreateFolderInTree(
+            resource.path, [eps.subPath, item.subPath]);
 
         // 获取目录中的所有文件
-        final existingFiles =
-            Directory(path).listSync().whereType<File>().toList();
+        final existingFiles = await miruListFolderFilesName(curPath!);
 
         for (var (idx, pageUrl) in watchData.urls.indexed) {
           if (_status == DownloadStatus.canceled) {
@@ -93,8 +90,8 @@ class MangaDownloader extends DownloadInterface {
               status == DownloadStatus.queued) {
             await Future.delayed(Duration(seconds: 1));
           }
-          final File? existingFile = existingFiles.firstWhereOrNull(
-            (file) => p.basenameWithoutExtension(file.path) == '$idx',
+          final String? existingFile = existingFiles.firstWhereOrNull(
+            (path) => p.basenameWithoutExtension(path) == '$idx',
           );
 
           if (existingFile != null) {
@@ -105,9 +102,19 @@ class MangaDownloader extends DownloadInterface {
                   responseType: ResponseType.bytes,
                   headers: watchData.headers));
           final picType = getImageType(res.data).extension;
-          final picPath = p.join(path, '$idx$picType');
-          File(picPath).writeAsBytes(res.data);
+          // final picPath = p.join(path, '$idx$picType');
+          // File(picPath).writeAsBytes(res.data);
+          await miruWriteFileBytes(curPath, '$idx$picType', res.data);
         }
+        final epTitle = eps.title;
+        final itemTitle = item.title;
+        logger.info('curPath: $curPath');
+        final offlineResource = _detail!.offlineResource;
+        offlineResource[epTitle] ??= {};
+        offlineResource[epTitle]![itemTitle] = curPath;
+        _detail!.offlineResource = offlineResource;
+        await DatabaseService.updateMiruDetail(
+            detailPackage!, detailUrl!, _detail!);
         count++;
       }
     }
@@ -147,22 +154,24 @@ class MangaDownloader extends DownloadInterface {
     }
     if (_status == DownloadStatus.completed) {
       // 更新MiruDetail中的数据
-      if (_detail != null && detailPackage != null && detailUrl != null) {
-        final offlineResource = _detail!.offlineResource;
-        for (var ep in _job.resource!.eps) {
-          final epTitle = ep.title;
-          for (var item in ep.items) {
-            final itemTitle = item.title;
-            final path = p.join(_job.resource!.path, ep.subPath, item.subPath);
-            offlineResource[epTitle] ??= {};
-            offlineResource[epTitle]![itemTitle] = path;
-          }
-        }
-        _detail!.offlineResource = offlineResource;
-        await DatabaseService.updateMiruDetail(detailPackage!, detailUrl!, _detail!);
-      }
+      // if (_detail != null && detailPackage != null && detailUrl != null) {
+      //   final offlineResource = _detail!.offlineResource;
+      //   for (var ep in _job.resource!.eps) {
+      //     final epTitle = ep.title;
+      //     for (var item in ep.items) {
+      //       final itemTitle = item.title;
+      //       final path = p.join(_job.resource!.path, ep.subPath, item.subPath);
+      //       offlineResource[epTitle] ??= {};
+      //       offlineResource[epTitle]![itemTitle] = path;
+      //     }
+      //   }
+      //   _detail!.offlineResource = offlineResource;
+      //   await DatabaseService.updateMiruDetail(
+      //       detailPackage!, detailUrl!, _detail!);
+      // }
     } else {
-      logger.warning('MangaDownloader: Download failed, update MiruDetail failed');
+      logger.warning(
+          'MangaDownloader: Download failed, update MiruDetail failed');
     }
     return _status;
   }

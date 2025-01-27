@@ -47,13 +47,13 @@ class _SettingsPageState extends State<SettingsPage> {
   final downloadPathController = TextEditingController(
       text: MiruStorage.getSetting(SettingKey.downloadPath));
 
-  Future<void> _updateDownloadPath(String newPath) async {
-    if (newPath == downloadPath) {
+  Future<void> _updateDownloadPath(String treePath) async {
+    final newPath = await miruCreateFolderInTree(treePath, ['Miru']);
+    if (newPath == null) {
+      logger.warning('SettingsPage: Failed to create Miru folder in $treePath');
       return;
     }
-    final temp = miruSplitPath(newPath);
-    if (await miruCreateFolderInTree(temp.$1, temp.$2) == null) {
-      logger.warning('SettingsPage: Failed to create folder: $newPath');
+    if (newPath == downloadPath) {
       return;
     }
     setState(() {
@@ -457,10 +457,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 trailing: PlatformWidget(
                   androidWidget: TextButton(
                     onPressed: () async {
-                      var path = await FilePicker.platform.getDirectoryPath();
+                      var path = await miruPickDir();
                       if (path != null) {
-                        String newPath = p.join(path, 'Miru');
-                        await _updateDownloadPath(newPath);
+                        await _updateDownloadPath(path);
                       }
                     },
                     child: Text('settings.download-path-select'.i18n),
@@ -483,8 +482,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           var path =
                               await FilePicker.platform.getDirectoryPath();
                           if (path != null) {
-                            String newPath = p.join(path, 'Miru');
-                            _updateDownloadPath(newPath);
+                            _updateDownloadPath(path);
                           }
                         },
                         child: Text('settings.download-path-select'.i18n),

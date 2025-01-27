@@ -2,7 +2,7 @@ import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/models/extension.dart';
 import 'package:miru_app/utils/miru_storage.dart';
 import 'package:miru_app/utils/path_utils.dart';
-import 'package:path/path.dart' as p;
+// import 'package:path/path.dart' as p;
 import 'package:miru_app/data/services/download/download_manager.dart';
 
 final DownloadManager downloadManager = DownloadManager();
@@ -12,11 +12,8 @@ class OfflineResourceService {
     // 创建文件夹
     String sanitizedName = sanitizeFileName(name);
     String rootPath = MiruStorage.getSetting(SettingKey.downloadPath);
-    String path =
-        p.join(rootPath, type.toString().split('.').last, sanitizedName);
-    // Directory(path).createSync(recursive: true);
-    await miruCreateFolder(path, recursive: true);
-    return path;
+    final path = await miruCreateFolderInTree(rootPath, [type.toString().split('.').last, sanitizedName]);
+    return path!;
   }
 
   static void startMangaDownloadJob(String package, String url,

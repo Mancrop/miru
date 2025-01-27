@@ -182,8 +182,8 @@ class _ComicReaderContentState extends State<ComicReaderContent> {
                   controller: _c.pageController.value,
                   itemBuilder: (BuildContext context, int index) {
                     final url = images[index];
-                    if (index < images.length - 1) {
-                      // 预加载后面所有的图片
+                    if (index < images.length - 1 && !_c.useOfflineData.value) {
+                      // 预加载后面一页的图片
                       precacheImage(
                         ExtendedNetworkImageProvider(
                           images[index + 1],

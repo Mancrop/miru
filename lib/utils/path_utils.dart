@@ -39,35 +39,49 @@ Future<List<String>> getSortedFiles(String directoryPath,
     return 0;
   }
 
-  // 获取文件夹
-  Directory directory = Directory(directoryPath);
+  if (!Platform.isAndroid) {
+    // 获取文件夹
+    Directory directory = Directory(directoryPath);
 
-  // 检查文件夹是否存在
-  if (!await directory.exists()) {
-    throw Exception('文件夹不存在: $directoryPath');
+    // 检查文件夹是否存在
+    if (!await directory.exists()) {
+      throw Exception('文件夹不存在: $directoryPath');
+    }
+
+    // 列出文件夹中的所有内容
+    List<FileSystemEntity> entities = directory.listSync();
+
+    // 过滤出文件（排除文件夹）
+    List<File> files = entities.whereType<File>().toList();
+
+    // 按文件名中的数字部分排序
+    files.sort((a, b) {
+      // 提取文件名中的数字部分
+      int numA = extractNumber(a.uri.pathSegments.last);
+      int numB = extractNumber(b.uri.pathSegments.last);
+
+      // 根据 ascending 参数决定排序顺序
+      return ascending ? numA.compareTo(numB) : numB.compareTo(numA);
+    });
+
+    // 返回文件的路径列表
+    return files.map((file) => file.path).toList();
+  } else {
+    final childDocs = await _safUtils.list(directoryPath);
+    // 过滤出文件（排除文件夹）
+    final files = childDocs.where((doc) => !doc.isDir).toList();
+    files.sort((a, b) {
+      final numA = extractNumber(a.name);
+      final numB = extractNumber(b.name);
+      return ascending ? numA.compareTo(numB) : numB.compareTo(numA);
+    });
+    final temp = childDocs.map((doc) => doc.uri.toString()).toList();
+    logger.info('getSortedFiles: len: ${temp.length} $temp');
+    return temp;
   }
-
-  // 列出文件夹中的所有内容
-  List<FileSystemEntity> entities = directory.listSync();
-
-  // 过滤出文件（排除文件夹）
-  List<File> files = entities.whereType<File>().toList();
-
-  // 按文件名中的数字部分排序
-  files.sort((a, b) {
-    // 提取文件名中的数字部分
-    int numA = extractNumber(a.uri.pathSegments.last);
-    int numB = extractNumber(b.uri.pathSegments.last);
-
-    // 根据 ascending 参数决定排序顺序
-    return ascending ? numA.compareTo(numB) : numB.compareTo(numA);
-  });
-
-  // 返回文件的路径列表
-  return files.map((file) => file.path).toList();
 }
 
-Future<String?> pickDir(
+Future<String?> miruPickDir(
     {bool writePermission = true, bool persistablePermission = true}) async {
   assert(Platform.isAndroid);
   final res = await _safUtils.pickDirectory(
@@ -90,20 +104,24 @@ Future<String?> miruCreateFolder(String folder, {bool recursive = true}) async {
   }
 }
 
-Future<String?> miruCreateFolderInTree(String treePath, String folder,
-    {bool recursive = true}) async {
+Future<String?> miruCreateFolderInTree(
+    String treePath, List<String> folder) async {
+  // 默认递归的创建文件夹
+  // folder参数：['Miru', 'temp']，则会递归创建treePath/Miru/temp文件夹
   try {
-    final path = p.join(treePath, folder);
+    final subPath = folder.join('/');
+    final path = p.join(treePath, subPath);
+    logger.info('miruCreateFolderInTree path: $path');
     if (!Platform.isAndroid) {
       if (Directory(path).existsSync()) {
         return path;
       }
-      Directory(path).createSync(recursive: recursive);
+      Directory(path).createSync(recursive: true);
       return path;
     } else {
       // 使用SAF对安卓文件进行读写
       // 在安卓中使用uri
-      final res = await _safUtils.mkdirp(treePath, [folder]);
+      final res = await _safUtils.mkdirp(treePath, folder);
       logger.info('uri: ${res.uri}');
       return res.uri.toString();
     }
@@ -129,9 +147,13 @@ Future<String?> miruCreateEmptyFile(String treePath, String fileName,
       // 在安卓中使用uri
       final isExist = await miruFileExist(treePath, fileName);
       if (isExist && !overwrite) {
-        logger.warning(
-            'miruCreateEmptyFile: File Already Exists, cannot return a specific uri in android');
-        return 'File Already Exists';
+        final file = await _safUtils.child(treePath, [fileName]);
+        if (file != null && !file.isDir) {
+          return file.uri.toString();
+        } else {
+          logger.warning('miruCreateEmptyFile: file is null');
+          return null;
+        }
       }
       final res = await _saf.writeFileBytes(
           treePath, fileName, 'application/octet-stream', Uint8List(0),
@@ -193,9 +215,13 @@ Future<String?> miruWriteFileBytes(
     try {
       final fileList = await _safUtils.child(treePath, [fileName]);
       if (fileList != null && !overwrite) {
-        logger.warning(
-            'miruWriteFileBytes: File Already Exists, cannot return a specific uri in android');
-        return 'File Already Exists';
+        final file = await _safUtils.child(treePath, [fileName]);
+        if (file != null && !file.isDir) {
+          return file.uri.toString();
+        } else {
+          logger.warning('miruWriteFileBytes: file is null');
+          return null;
+        }
       }
       final res = await _saf.writeFileBytes(
           treePath, fileName, 'application/octet-stream', bytes,
@@ -242,5 +268,25 @@ Future<String?> miruGetActualPath(String path) async {
     }
   } else {
     return path;
+  }
+}
+
+Future<List<String>> miruListFolderFilesName(String treePath) async {
+  try {
+    if (!Platform.isAndroid) {
+      return Directory(treePath)
+          .listSync()
+          .whereType<File>()
+          .map((f) => p.basename(f.path))
+          .toList();
+    } else {
+      return (await _safUtils.list(treePath))
+          .where((elem) => !elem.isDir)
+          .map((f) => f.name)
+          .toList();
+    }
+  } catch (e) {
+    logger.info('miruListFolderFilesName error: $e');
+    return [];
   }
 }

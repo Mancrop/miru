@@ -179,11 +179,11 @@ class _WelcomeSettingPage extends State<WelcomeSettingPage> {
                           child: ElevatedButton(
                             onPressed: () async {
                               var newPath =
-                                  await pickDir(writePermission: true);
+                                  await miruPickDir(writePermission: true);
                               if (newPath == null || newPath == downloadPath) {
                                 return;
                               }
-                              final folderUri = await miruCreateFolderInTree(newPath, 'Miru');
+                              final folderUri = await miruCreateFolderInTree(newPath, ['Miru']);
                               if (folderUri == null) {
                                 return;
                               }
