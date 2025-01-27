@@ -143,8 +143,6 @@ class MiruStorage {
 
     await _initSetting(SettingKey.firstTimeSetup, true);
     await _initSetting(SettingKey.isNotificationGranted, false);
-    await _initSetting(SettingKey.isStorageGranted, false);
-
   }
 
   static _initSetting(String key, dynamic value) async {
@@ -217,5 +215,4 @@ class SettingKey {
   // first time setup tag
   static const firstTimeSetup = "FirstTimeSetup";
   static const isNotificationGranted = "IsNotificationGranted";
-  static const isStorageGranted = "IsStorageGranted";
 }

@@ -200,8 +200,9 @@ class _AndroidMainPageState extends fluent.State<AndroidMainPage> {
     c = Get.put(MainController());
     logger.info("${MiruStorage.getSetting(SettingKey.firstTimeSetup)}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.to(() => const AndroidWelcomePage());
-      if (MiruStorage.getSetting(SettingKey.firstTimeSetup)) {
+      if (MiruStorage.getSetting(SettingKey.firstTimeSetup) ||
+          !MiruStorage.getSetting(SettingKey.isNotificationGranted) ||
+          MiruStorage.getSetting(SettingKey.downloadPath) == '') {
         Get.to(() => const AndroidWelcomePage());
         MiruStorage.setSetting(SettingKey.firstTimeSetup, false);
       }
