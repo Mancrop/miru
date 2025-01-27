@@ -7,7 +7,6 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/utils/i18n.dart';
-import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/path_utils.dart';
 import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/views/widgets/messenger.dart';
@@ -138,108 +137,6 @@ class _CacheNetWorkImagePicState extends State<CacheNetWorkImagePic> {
     return image;
   }
 }
-
-// class CacheNetWorkImagePic extends StatelessWidget {
-//   const CacheNetWorkImagePic(
-//     this.url, {
-//     super.key,
-//     this.fit = BoxFit.cover,
-//     this.width,
-//     this.height,
-//     this.fallback,
-//     this.headers,
-//     this.placeholder,
-//     this.canFullScreen = false,
-//     this.mode = ExtendedImageMode.none,
-//     this.useOfflineResource = false,
-//   });
-//   final String url;
-//   final BoxFit fit;
-//   final double? width;
-//   final double? height;
-//   final Widget? fallback;
-//   final Map<String, String>? headers;
-//   final bool canFullScreen;
-//   final Widget? placeholder;
-//   final ExtendedImageMode mode;
-//   final bool useOfflineResource;
-
-//   _errorBuild() {
-//     if (fallback != null) {
-//       return fallback!;
-//     }
-//     return const Center(child: Icon(fluent.FluentIcons.error));
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     late Widget image;
-//     if (!useOfflineResource) {
-//       image = ExtendedImage.network(
-//         url,
-//         headers: headers,
-//         fit: fit,
-//         width: width,
-//         height: height,
-//         cache: true,
-//         mode: mode,
-//         loadStateChanged: (state) {
-//           switch (state.extendedImageLoadState) {
-//             case LoadState.loading:
-//               return placeholder ?? const SizedBox();
-//             case LoadState.completed:
-//               return state.completedWidget;
-//             case LoadState.failed:
-//               return _errorBuild();
-//           }
-//         },
-//       );
-//     } else {
-//       image = ExtendedImage.file(
-//         File(url),
-//         fit: fit,
-//         width: width,
-//         height: height,
-//         mode: mode,
-//         loadStateChanged: (state) {
-//           switch (state.extendedImageLoadState) {
-//             case LoadState.loading:
-//               return placeholder ?? const SizedBox();
-//             case LoadState.completed:
-//               return state.completedWidget;
-//             case LoadState.failed:
-//               return _errorBuild();
-//           }
-//         },
-//       );
-//     }
-
-//     if (canFullScreen) {
-//       return MouseRegion(
-//         cursor: SystemMouseCursors.click,
-//         child: GestureDetector(
-//           onTap: () {
-//             final thumnailPage = _ThumnailPage(
-//               url: url,
-//               headers: headers,
-//             );
-//             if (Platform.isAndroid) {
-//               Get.to(() => thumnailPage);
-//               return;
-//             }
-//             fluent.showDialog(
-//               context: context,
-//               builder: (_) => thumnailPage,
-//             );
-//           },
-//           child: image,
-//         ),
-//       );
-//     }
-
-//     return image;
-//   }
-// }
 
 class _ThumnailPage extends StatefulWidget {
   const _ThumnailPage({
