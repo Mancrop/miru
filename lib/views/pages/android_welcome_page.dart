@@ -163,7 +163,7 @@ class _WelcomeSettingPage extends State<WelcomeSettingPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Select a directory to store Miru\'s offline content (manga, comics, etc.)',
+                              'Select a directory to store Miru\'s offline content (manga, anime, etc.)',
                               style: TextStyle(
                                   fontSize: 16, color: Colors.black),
                             ),
