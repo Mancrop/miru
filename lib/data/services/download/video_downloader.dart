@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_hls_parser/flutter_hls_parser.dart';
 import 'package:miru_app/data/services/database_service.dart';
@@ -146,13 +147,25 @@ class VideoDownloader extends DownloadInterface {
           final segmentCount = segments.length;
           var downloadedCount = 0;
 
-          for (var segment in segments) {
+          var maxDuration = Duration.zero;
+          for (var (segmentIndex, segment) in segments.indexed) {
             if (_status == DownloadStatus.canceled) {
               return DownloadStatus.canceled;
             }
             while (status == DownloadStatus.paused ||
                 status == DownloadStatus.queued) {
               await Future.delayed(Duration(seconds: 1));
+            }
+
+            final fileName = '$segmentIndex.ts';
+            final filePath = '${curPath}/$fileName';
+
+            // 检查文件是否已存在
+            if (await File(filePath).exists()) {
+              logger.info('Segment already exists: $fileName');
+              downloadedCount++;
+              _progress = (count + downloadedCount / segmentCount) / total;
+              continue;
             }
 
             // 构建完整的分片URL
@@ -162,40 +175,63 @@ class VideoDownloader extends DownloadInterface {
               continue;
             }
             
-            logger.info('Raw segment URL: $segmentUri');
-            
-            String segmentUrl;
-            try {
-              final parsedSegmentUri = Uri.parse(segmentUri);
-              segmentUrl = parsedSegmentUri.hasScheme ? 
-                  segmentUri : 
-                  Uri.parse(playlistUrl).resolve(segmentUri).toString();
-              
-              logger.info('Final segment URL: $segmentUrl');
-            } catch (e) {
-              logger.warning('Failed to parse segment URL: $segmentUri', e);
-              continue;
+            var retryCount = 0;
+
+            while (retryCount < 5) {
+              try {
+                final parsedSegmentUri = Uri.parse(segmentUri);
+                final url = parsedSegmentUri.hasScheme ? 
+                    segmentUri : 
+                    Uri.parse(playlistUrl).resolve(segmentUri).toString();
+                
+                logger.info('Downloading segment URL: $url');
+                
+                final response = await Dio().get(
+                  url,
+                  options: Options(
+                    responseType: ResponseType.bytes,
+                    headers: watchData.headers
+                  ),
+                );
+
+                await miruWriteFileBytes(curPath, fileName, response.data);
+                downloadedCount++;
+                _progress = (count + downloadedCount / segmentCount) / total;
+                break;
+              } catch (e) {
+                retryCount++;
+                if (retryCount >= 5) {
+                  logger.warning('Failed to download segment after 5 retries: $segmentUri', e);
+                  continue;
+                }
+                logger.info('Retry $retryCount for segment: $segmentUri');
+                await Future.delayed(Duration(seconds: 1));
+              }
             }
-            final segmentIndex = segments.indexOf(segment);
-            final fileName = '$segmentIndex.ts';
 
-            try {
-              final response = await Dio().get(
-                segmentUrl,
-                options: Options(
-                  responseType: ResponseType.bytes,
-                  headers: watchData.headers
-                ),
-              );
-
-              await miruWriteFileBytes(curPath, fileName, response.data);
-              downloadedCount++;
-              _progress = (count + downloadedCount / segmentCount) / total;
-            } catch (e) {
-              logger.warning('Failed to download segment: $segmentUrl', e);
-              continue;
+            final segmentDuration = Duration(microseconds: segment.durationUs ?? 0);
+            if (segmentDuration > maxDuration) {
+              maxDuration = segmentDuration;
             }
           }
+
+          // 生成m3u8文件
+          final buffer = StringBuffer();
+          buffer.writeln('#EXTM3U');
+          buffer.writeln('#EXT-X-VERSION:3');
+          buffer.writeln('#EXT-X-TARGETDURATION:${maxDuration.inSeconds}');
+          buffer.writeln('#EXT-X-MEDIA-SEQUENCE:0');
+
+          for (var (index, segment) in segments.indexed) {
+            if (File('$curPath/$index.ts').existsSync()) {
+              final segmentDuration = Duration(microseconds: segment.durationUs ?? 0);
+              buffer.writeln('#EXTINF:${segmentDuration.inSeconds.toStringAsFixed(3)},');
+              buffer.writeln('$index.ts');
+            }
+          }
+
+          buffer.writeln('#EXT-X-ENDLIST');
+          await File('$curPath/playlist.m3u8').writeAsString(buffer.toString());
         } catch (e) {
           logger.warning('Failed to process playlist: ${watchData.url}', e);
           return DownloadStatus.failed;
