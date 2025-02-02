@@ -7,6 +7,7 @@ import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/download/download_interface.dart';
 import 'package:miru_app/data/services/download/manga_downloader.dart';
 import 'package:miru_app/data/services/download/mobile_foreground_service.dart';
+import 'package:miru_app/data/services/download/video_downloader.dart';
 import 'package:miru_app/models/download_job.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/miru_storage.dart';
@@ -162,7 +163,7 @@ class DownloadManager {
         _queue.add(MangaDownloader(downloadJob, id));
         break;
       case ResourceType.video:
-        assert(false, 'Not implemented');
+        _queue.add(VideoDownloader(downloadJob, id));
         break;
       case ResourceType.novel:
         assert(false, 'Not implemented');

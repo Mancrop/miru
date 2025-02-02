@@ -458,8 +458,17 @@ class DetailPageController extends GetxController {
   }
 
   download(List<int> selected) {
-    OfflineResourceService.startMangaDownloadJob(
+    if (type == ExtensionType.manga) {
+          OfflineResourceService.startMangaDownloadJob(
         package, url, detail!, selectEpGroup.value, selected);
+    } else if (type == ExtensionType.bangumi) {
+      OfflineResourceService.startAnimeDownloadJob(
+        package, url, detail!, selectEpGroup.value, selected);
+    } else if (type == ExtensionType.fikushon) {
+      throw UnimplementedError();
+    } else {
+      throw 'Unknown extension type';
+    }
   }
 
   @override
