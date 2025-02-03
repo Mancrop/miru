@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_hls_parser/flutter_hls_parser.dart';
 import 'package:miru_app/data/services/database_service.dart';
@@ -62,7 +62,8 @@ class VideoDownloader extends DownloadInterface {
     return DownloaderType.vedioDownloader;
   }
 
-  Future<(String url, List<Segment> segments)> _getM3U8Segments(String url, Map<String, String> headers) async {
+  Future<(String url, List<Segment> segments)> _getM3U8Segments(
+      String url, Map<String, String> headers) async {
     logger.info('get_m3u8_segments_url: $url, headers: $headers');
     final response = await Dio().get(
       url,
@@ -109,7 +110,7 @@ class VideoDownloader extends DownloadInterface {
       // Get the first variant (usually highest quality)
       final variant = playlist.variants.first;
       final variantUrl = variant.url.toString();
-      
+
       // Recursively get segments from the variant playlist
       return await _getM3U8Segments(variantUrl, headers);
     } else if (playlist is HlsMediaPlaylist) {
@@ -133,17 +134,20 @@ class VideoDownloader extends DownloadInterface {
           await Future.delayed(Duration(seconds: 1));
         }
         _progress = count / total;
-        
-        final watchData = await runtime.watch(item.url) as ExtensionBangumiWatch;
-          final curPath = await miruCreateFolderInTree(
-              resource.path, [eps.subPath, item.subPath]);
-          if (curPath == null) {
-            logger.warning('Failed to create directory: ${[eps.subPath, item.subPath]}');
-            return DownloadStatus.failed;
-          }
+
+        final watchData =
+            await runtime.watch(item.url) as ExtensionBangumiWatch;
+        final curPath = await miruCreateFolderInTree(
+            resource.path, [eps.subPath, item.subPath]);
+        if (curPath == null) {
+          logger.warning(
+              'Failed to create directory: ${[eps.subPath, item.subPath]}');
+          return DownloadStatus.failed;
+        }
 
         try {
-          final (playlistUrl, segments) = await _getM3U8Segments(watchData.url, watchData.headers ?? {});
+          final (playlistUrl, segments) =
+              await _getM3U8Segments(watchData.url, watchData.headers ?? {});
           final segmentCount = segments.length;
           var downloadedCount = 0;
 
@@ -158,10 +162,9 @@ class VideoDownloader extends DownloadInterface {
             }
 
             final fileName = '$segmentIndex.ts';
-            final filePath = '${curPath}/$fileName';
 
             // 检查文件是否已存在
-            if (await File(filePath).exists()) {
+            if (await miruFileExist(curPath, fileName)) {
               logger.info('Segment already exists: $fileName');
               downloadedCount++;
               _progress = (count + downloadedCount / segmentCount) / total;
@@ -174,24 +177,23 @@ class VideoDownloader extends DownloadInterface {
               logger.warning('Segment URL is null');
               continue;
             }
-            
+
             var retryCount = 0;
 
             while (retryCount < 5) {
               try {
                 final parsedSegmentUri = Uri.parse(segmentUri);
-                final url = parsedSegmentUri.hasScheme ? 
-                    segmentUri : 
-                    Uri.parse(playlistUrl).resolve(segmentUri).toString();
-                
+                final url = parsedSegmentUri.hasScheme
+                    ? segmentUri
+                    : Uri.parse(playlistUrl).resolve(segmentUri).toString();
+
                 logger.info('Downloading segment URL: $url');
-                
+
                 final response = await Dio().get(
                   url,
                   options: Options(
-                    responseType: ResponseType.bytes,
-                    headers: watchData.headers
-                  ),
+                      responseType: ResponseType.bytes,
+                      headers: watchData.headers),
                 );
 
                 await miruWriteFileBytes(curPath, fileName, response.data);
@@ -201,7 +203,9 @@ class VideoDownloader extends DownloadInterface {
               } catch (e) {
                 retryCount++;
                 if (retryCount >= 5) {
-                  logger.warning('Failed to download segment after 5 retries: $segmentUri', e);
+                  logger.warning(
+                      'Failed to download segment after 5 retries: $segmentUri',
+                      e);
                   continue;
                 }
                 logger.info('Retry $retryCount for segment: $segmentUri');
@@ -209,7 +213,8 @@ class VideoDownloader extends DownloadInterface {
               }
             }
 
-            final segmentDuration = Duration(microseconds: segment.durationUs ?? 0);
+            final segmentDuration =
+                Duration(microseconds: segment.durationUs ?? 0);
             if (segmentDuration > maxDuration) {
               maxDuration = segmentDuration;
             }
@@ -223,15 +228,21 @@ class VideoDownloader extends DownloadInterface {
           buffer.writeln('#EXT-X-MEDIA-SEQUENCE:0');
 
           for (var (index, segment) in segments.indexed) {
-            if (File('$curPath/$index.ts').existsSync()) {
-              final segmentDuration = Duration(microseconds: segment.durationUs ?? 0);
-              buffer.writeln('#EXTINF:${segmentDuration.inSeconds.toStringAsFixed(3)},');
+            if (await miruFileExist(curPath, '$index.ts')) {
+              final segmentDuration =
+                  Duration(microseconds: segment.durationUs ?? 0);
+              buffer.writeln(
+                  '#EXTINF:${segmentDuration.inSeconds.toStringAsFixed(3)},');
               buffer.writeln('$index.ts');
             }
           }
 
           buffer.writeln('#EXT-X-ENDLIST');
-          await File('$curPath/playlist.m3u8').writeAsString(buffer.toString());
+          await miruWriteFileBytes(
+              curPath,
+              '${item.title}.m3u8',
+              Uint8List.fromList(buffer.toString().codeUnits)
+          );
         } catch (e) {
           logger.warning('Failed to process playlist: ${watchData.url}', e);
           return DownloadStatus.failed;
@@ -250,7 +261,7 @@ class VideoDownloader extends DownloadInterface {
         count++;
       }
     }
-    
+
     while (status == DownloadStatus.paused || status == DownloadStatus.queued) {
       await Future.delayed(Duration(seconds: 1));
     }
@@ -271,7 +282,7 @@ class VideoDownloader extends DownloadInterface {
         _status = DownloadStatus.failed;
         return DownloadStatus.failed;
       }
-      
+
       _status = DownloadStatus.downloading;
       _job.status = _status;
 
