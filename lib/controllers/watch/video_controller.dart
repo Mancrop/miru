@@ -414,7 +414,6 @@ class VideoPlayerController extends GetxController {
           await dlnaDevice.value!.play();
         } else {
           getQuality();
-          logger.info('url: ${watchData!.url}');
           await player.open(
             Media(watchData!.url, httpHeaders: watchData!.headers),
           );
@@ -515,7 +514,6 @@ class VideoPlayerController extends GetxController {
   getQuality() async {
     final url = watchData!.url;
     final headers = watchData!.headers;
-    logger.info('get_quality_url: $url, headers: $headers');
     final response = await dio.get(
       url,
       options: Options(
@@ -540,15 +538,12 @@ class VideoPlayerController extends GetxController {
     final stream = response.data.stream;
     final buffer = StringBuffer();
 
-    logger.info('realUri: ${response.realUri}');
-
     stream.listen(
       (data) {
         buffer.write(utf8.decode(data));
       },
       onDone: () {
         final m3u8Content = buffer.toString();
-        logger.info('m3u8Content: $m3u8Content');
         completer.complete(m3u8Content);
       },
       onError: (error) {

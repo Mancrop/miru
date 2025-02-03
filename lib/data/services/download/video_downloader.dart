@@ -13,9 +13,16 @@ import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/path_utils.dart';
 
 class VideoDownloader extends DownloadInterface {
+  // 配置最大并发数
+  static const int maxConcurrentDownloads = 3;
+  
   late int _id;
   var _progress = 0.0;
   var _status = DownloadStatus.queued;
+  // 跟踪每个分片的下载进度
+  final _downloadProgress = <String, double>{};
+  // 跟踪活动的下载任务
+  final _activeDownloads = <String, CancelToken>{};
   late String _name;
   late String _url;
   late DownloadJob _job;
@@ -149,75 +156,30 @@ class VideoDownloader extends DownloadInterface {
           final (playlistUrl, segments) =
               await _getM3U8Segments(watchData.url, watchData.headers ?? {});
           final segmentCount = segments.length;
-          var downloadedCount = 0;
-
           var maxDuration = Duration.zero;
-          for (var (segmentIndex, segment) in segments.indexed) {
-            if (_status == DownloadStatus.canceled) {
-              return DownloadStatus.canceled;
-            }
-            while (status == DownloadStatus.paused ||
-                status == DownloadStatus.queued) {
-              await Future.delayed(Duration(seconds: 1));
-            }
 
-            final fileName = '$segmentIndex.ts';
-
-            // 检查文件是否已存在
-            if (await miruFileExist(curPath, fileName)) {
-              logger.info('Segment already exists: $fileName');
-              downloadedCount++;
-              _progress = (count + downloadedCount / segmentCount) / total;
-              continue;
-            }
-
-            // 构建完整的分片URL
-            final segmentUri = segment.url;
-            if (segmentUri == null) {
-              logger.warning('Segment URL is null');
-              continue;
-            }
-
-            var retryCount = 0;
-
-            while (retryCount < 5) {
-              try {
-                final parsedSegmentUri = Uri.parse(segmentUri);
-                final url = parsedSegmentUri.hasScheme
-                    ? segmentUri
-                    : Uri.parse(playlistUrl).resolve(segmentUri).toString();
-
-                logger.info('Downloading segment URL: $url');
-
-                final response = await Dio().get(
-                  url,
-                  options: Options(
-                      responseType: ResponseType.bytes,
-                      headers: watchData.headers),
-                );
-
-                await miruWriteFileBytes(curPath, fileName, response.data);
-                downloadedCount++;
-                _progress = (count + downloadedCount / segmentCount) / total;
-                break;
-              } catch (e) {
-                retryCount++;
-                if (retryCount >= 5) {
-                  logger.warning(
-                      'Failed to download segment after 5 retries: $segmentUri',
-                      e);
-                  continue;
+          // 使用并发下载方法
+          try {
+            await _downloadSegments(
+              playlistUrl: playlistUrl,
+              segments: segments,
+              curPath: curPath,
+              headers: watchData.headers ?? {},
+              onProgress: (downloadedCount) {
+                // 当前分片组的进度 = 已完成分片数 / 总分片数
+                final currentProgress = downloadedCount / segmentCount;
+                // 总进度 = (已完成的分片组数 + 当前分片组进度) / 总分片组数
+                _progress = (count + currentProgress) / total;
+              },
+              onSegmentDuration: (duration) {
+                if (duration > maxDuration) {
+                  maxDuration = duration;
                 }
-                logger.info('Retry $retryCount for segment: $segmentUri');
-                await Future.delayed(Duration(seconds: 1));
-              }
-            }
-
-            final segmentDuration =
-                Duration(microseconds: segment.durationUs ?? 0);
-            if (segmentDuration > maxDuration) {
-              maxDuration = segmentDuration;
-            }
+              },
+            );
+          } catch (e) {
+            logger.warning('Failed to download segments', e);
+            return DownloadStatus.failed;
           }
 
           // 生成m3u8文件
@@ -315,6 +277,124 @@ class VideoDownloader extends DownloadInterface {
     _job.status = _status;
   }
 
+  Future<void> _downloadSegment({
+    required int index,
+    required Segment segment,
+    required String playlistUrl,
+    required String curPath,
+    required Map<String, String> headers,
+  }) async {
+    final fileName = '$index.ts';
+    final segmentUri = segment.url;
+    if (segmentUri == null) {
+      logger.warning('Segment URL is null');
+      return;
+    }
+
+    var retryCount = 0;
+    final cancelToken = CancelToken();
+    _activeDownloads['$index'] = cancelToken;
+
+    while (retryCount < 5) {
+      try {
+        final parsedSegmentUri = Uri.parse(segmentUri);
+        final url = parsedSegmentUri.hasScheme
+            ? segmentUri
+            : Uri.parse(playlistUrl).resolve(segmentUri).toString();
+
+        logger.info('Downloading segment URL: $url');
+
+        final response = await Dio().get(
+          url,
+          options: Options(
+            responseType: ResponseType.bytes,
+            headers: headers,
+          ),
+          cancelToken: cancelToken,
+        );
+
+        await miruWriteFileBytes(curPath, fileName, response.data);
+        break;
+      } catch (e) {
+        if (e is DioException && e.type == DioExceptionType.cancel) {
+          _activeDownloads.remove('$index');
+          rethrow;
+        }
+        
+        retryCount++;
+        if (retryCount >= 5) {
+          logger.warning('Failed to download segment after 5 retries: $segmentUri', e);
+          break;
+        }
+        logger.info('Retry $retryCount for segment: $segmentUri');
+        await Future.delayed(Duration(seconds: 1));
+      }
+    }
+
+    _activeDownloads.remove('$index');
+  }
+
+  Future<void> _downloadSegments({
+    required String playlistUrl,
+    required List<Segment> segments,
+    required String curPath,
+    required Map<String, String> headers,
+    required Function(int) onProgress,
+    required Function(Duration) onSegmentDuration,
+  }) async {
+    var downloadedCount = 0;
+
+    for (var i = 0; i < segments.length; i += maxConcurrentDownloads) {
+      // 检查是否取消
+      if (_status == DownloadStatus.canceled) {
+        // 取消所有活动下载
+        for (final cancelToken in _activeDownloads.values) {
+          cancelToken.cancel('Download canceled');
+        }
+        _activeDownloads.clear();
+        return;
+      }
+
+      // 暂停时等待
+      while (_status == DownloadStatus.paused) {
+        await Future.delayed(Duration(seconds: 1));
+      }
+
+      final batch = segments.skip(i).take(maxConcurrentDownloads);
+      final futures = <Future<void>>[];
+
+      for (var (index, segment) in batch.indexed) {
+        final segmentIndex = i + index;
+        final fileName = '$segmentIndex.ts';
+
+        // 检查文件是否已存在
+        if (await miruFileExist(curPath, fileName)) {
+          logger.info('Segment already exists: $fileName');
+          downloadedCount++;
+          onProgress(downloadedCount);
+          onSegmentDuration(Duration(microseconds: segment.durationUs ?? 0));
+          continue;
+        }
+
+        futures.add(_downloadSegment(
+          index: segmentIndex,
+          segment: segment,
+          playlistUrl: playlistUrl,
+          curPath: curPath,
+          headers: headers,
+        ).then((_) {
+          downloadedCount++;
+          onProgress(downloadedCount);
+          onSegmentDuration(Duration(microseconds: segment.durationUs ?? 0));
+        }));
+      }
+
+      if (futures.isNotEmpty) {
+        await Future.wait(futures);
+      }
+    }
+  }
+
   @override
   Future<void> cancel() async {
     if (deadStatus()) {
@@ -322,6 +402,12 @@ class VideoDownloader extends DownloadInterface {
     }
     _status = DownloadStatus.canceled;
     _job.status = _status;
+    
+    // 取消所有活动的下载
+    for (final cancelToken in _activeDownloads.values) {
+      cancelToken.cancel('Download canceled');
+    }
+    _activeDownloads.clear();
   }
 
   @override
