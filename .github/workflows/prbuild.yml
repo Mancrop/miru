@@ -88,6 +88,8 @@ jobs:
   build-and-release-linux:
     runs-on: ubuntu-latest
     steps:
+      - name: Update package list
+        run: sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
       - name: Install Dependencies
         run: sudo apt-get install ninja-build build-essential libgtk-3-dev libmpv-dev mpv
       - uses: actions/checkout@v3
