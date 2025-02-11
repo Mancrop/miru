@@ -44,6 +44,8 @@ class WatchPage extends StatelessWidget {
           episodeGroupId: episodeGroupId,
           detailUrl: detailUrl,
           anilistID: anilistID,
+          miruDetail: detail,
+          extensionDetail: extensionDetail,
         );
       case ExtensionType.manga:
         return ComicReader(

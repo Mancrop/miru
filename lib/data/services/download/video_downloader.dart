@@ -20,7 +20,7 @@ class VideoDownloader extends DownloadInterface {
   var _progress = 0.0;
   var _status = DownloadStatus.queued;
   // 跟踪每个分片的下载进度
-  final _downloadProgress = <String, double>{};
+  // final _downloadProgress = <String, double>{};
   // 跟踪活动的下载任务
   final _activeDownloads = <String, CancelToken>{};
   late String _name;
