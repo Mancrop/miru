@@ -15,7 +15,7 @@ import 'package:miru_app/utils/path_utils.dart';
 class VideoDownloader extends DownloadInterface {
   // 配置最大并发数
   static const int maxConcurrentDownloads = 3;
-  
+
   late int _id;
   var _progress = 0.0;
   var _status = DownloadStatus.queued;
@@ -200,11 +200,8 @@ class VideoDownloader extends DownloadInterface {
           }
 
           buffer.writeln('#EXT-X-ENDLIST');
-          await miruWriteFileBytes(
-              curPath,
-              '${item.title}.m3u8',
-              Uint8List.fromList(buffer.toString().codeUnits)
-          );
+          await miruWriteFileBytes(curPath, '${item.title}.m3u8',
+              Uint8List.fromList(buffer.toString().codeUnits));
         } catch (e) {
           logger.warning('Failed to process playlist: ${watchData.url}', e);
           return DownloadStatus.failed;
@@ -320,10 +317,11 @@ class VideoDownloader extends DownloadInterface {
           _activeDownloads.remove('$index');
           rethrow;
         }
-        
+
         retryCount++;
         if (retryCount >= 5) {
-          logger.warning('Failed to download segment after 5 retries: $segmentUri', e);
+          logger.warning(
+              'Failed to download segment after 5 retries: $segmentUri', e);
           break;
         }
         logger.info('Retry $retryCount for segment: $segmentUri');
@@ -402,7 +400,7 @@ class VideoDownloader extends DownloadInterface {
     }
     _status = DownloadStatus.canceled;
     _job.status = _status;
-    
+
     // 取消所有活动的下载
     for (final cancelToken in _activeDownloads.values) {
       cancelToken.cancel('Download canceled');
