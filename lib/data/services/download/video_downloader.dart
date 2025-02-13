@@ -188,9 +188,10 @@ class VideoDownloader extends DownloadInterface {
           buffer.writeln('#EXT-X-VERSION:3');
           buffer.writeln('#EXT-X-TARGETDURATION:${maxDuration.inSeconds}');
           buffer.writeln('#EXT-X-MEDIA-SEQUENCE:0');
+          final existFiles = await miruListFolderFilesName(curPath);
 
           for (var (index, segment) in segments.indexed) {
-            if (await miruFileExist(curPath, '$index.ts')) {
+            if (existFiles.contains('$index.ts')) {
               final segmentDuration =
                   Duration(microseconds: segment.durationUs ?? 0);
               buffer.writeln(
@@ -341,6 +342,7 @@ class VideoDownloader extends DownloadInterface {
     required Function(Duration) onSegmentDuration,
   }) async {
     var downloadedCount = 0;
+    final existFiles = await miruListFolderFilesName(curPath);
 
     for (var i = 0; i < segments.length; i += maxConcurrentDownloads) {
       // 检查是否取消
@@ -366,7 +368,7 @@ class VideoDownloader extends DownloadInterface {
         final fileName = '$segmentIndex.ts';
 
         // 检查文件是否已存在
-        if (await miruFileExist(curPath, fileName)) {
+        if (existFiles.contains(fileName)) {
           logger.info('Segment already exists: $fileName');
           downloadedCount++;
           onProgress(downloadedCount);
