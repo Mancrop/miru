@@ -130,7 +130,7 @@ jobs:
           ref: main
       - uses: subosito/flutter-action@v2.12.0
         with:
-          flutter-version: 3.24.5
+          flutter-version: 3.27.3
           channel: stable
       - name: Install project dependencies
         run: flutter pub get
