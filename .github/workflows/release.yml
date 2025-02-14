@@ -62,17 +62,17 @@ jobs:
 
       # 发布安装包
       - name: Upload Artifact - armeabi-v7a
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
           name: Miru-${{github.ref_name}}-armeabi-v7a.apk
       - name: Upload Artifact - arm64-v8a
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
           name: Miru-${{github.ref_name}}-arm64-v8a.apk
       - name: Upload Artifact - x86
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: "build/app/outputs/flutter-apk/app-x86_64-release.apk"
           name: Miru-${{github.ref_name}}-x86_64.apk
@@ -112,11 +112,11 @@ jobs:
   #         directory: build/linux/x64/release/bundle
   #     # 发布安装包
   #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@v3
+  #       uses: actions/upload-artifact@v4
   #       with:
   #         path: "build/linux/x64/release/bundle/Miru-${{github.ref_name}}-linux.zip"
   #     - name: Release Packages
-  #       uses: ncipollo/release-action@v1
+  #       uses: ncipollo/release-action@v4
   #       with:
   #         artifacts: "build/linux/x64/release/bundle/Miru-${{github.ref_name}}-linux.zip"
   #         allowUpdates: true
@@ -153,7 +153,7 @@ jobs:
           mv build/windows/x64/runner/Release build/windows/x64/runner/Miru-App
       # 发布安装包
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: "build/windows/x64/runner/Miru-App"
           name: Miru-pr-${{ github.event.pull_request.number }}-windows.zip
