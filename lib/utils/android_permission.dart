@@ -15,20 +15,21 @@ Future<int> getAndroidVersion() async {
 }
 
 Future<bool> requestFullStoragePermissions() async {
-  var status = await Permission.storage.status;
-  if (!status.isGranted) {
-    status = await Permission.storage.request();
-  }
-  var status1 = await Permission.manageExternalStorage.request();
+  var status = await Permission.manageExternalStorage.request();
   if (status.isGranted) {
     return true;
   } else if (status.isPermanentlyDenied) {
     openAppSettings();
   }
-  return status.isGranted && status1.isGranted;
+  return status.isGranted;
 }
 
-Future<bool> requestBasicStoragePermissions() async {
+Future<bool> isFullStoragePermissionGranted() async {
+  var status = await Permission.manageExternalStorage.status;
+  return status.isGranted;
+}
+
+Future<bool> requestMediaAccessPermissions() async {
   if (Platform.isAndroid) {
     List<Permission> permissions = [
       Permission.storage,

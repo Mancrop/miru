@@ -190,6 +190,24 @@ Future<File> miruGetFile(String path) async {
   }
 }
 
+Future<String?> miruGetFileUri(String treeUri, String name) async {
+  if (!Platform.isAndroid) {
+    throw Exception('miruGetFileUri: not supported on this platform');
+  } else {
+    try {
+      final file = await _safUtils.child(treeUri, [name]);
+      if (file != null && !file.isDir) {
+        return file.uri.toString();
+      } else {
+        return null;
+      }
+    } catch (e) {
+      logger.warning('miruGetFileUri error: $e');
+      return null;
+    }
+  }
+}
+
 Future<bool> miruFileExist(String treePath, String fileName) async {
   final path = p.join(treePath, fileName);
   try {
@@ -210,7 +228,8 @@ Future<bool> miruFileExist(String treePath, String fileName) async {
 
 Future<String?> miruWriteFileBytes(
     String treePath, String fileName, Uint8List bytes,
-    {bool overwrite = false, String fileType = 'application/octet-stream'}) async {
+    {bool overwrite = false,
+    String fileType = 'application/octet-stream'}) async {
   final path = p.join(treePath, fileName);
   // 用于写入外部文件（特指安卓/苹果）
   if (!Platform.isAndroid) {
@@ -228,8 +247,7 @@ Future<String?> miruWriteFileBytes(
           return null;
         }
       }
-      final res = await _saf.writeFileBytes(
-          treePath, fileName, fileType, bytes,
+      final res = await _saf.writeFileBytes(treePath, fileName, fileType, bytes,
           overwrite: overwrite);
       return res.uri.toString();
     } catch (e) {

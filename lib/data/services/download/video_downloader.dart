@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_hls_parser/flutter_hls_parser.dart';
@@ -151,7 +152,7 @@ class VideoDownloader extends DownloadInterface {
               'Failed to create directory: ${[eps.subPath, item.subPath]}');
           return DownloadStatus.failed;
         }
-
+        String? mediaPath;
         try {
           final (playlistUrl, segments) =
               await _getM3U8Segments(watchData.url, watchData.headers ?? {});
@@ -201,8 +202,11 @@ class VideoDownloader extends DownloadInterface {
           }
 
           buffer.writeln('#EXT-X-ENDLIST');
-          await miruWriteFileBytes(curPath, '${item.title}.m3u8',
-              Uint8List.fromList(buffer.toString().codeUnits));
+          mediaPath = await miruWriteFileBytes(curPath, '${item.title}.m3u8',
+              Uint8List.fromList(buffer.toString().codeUnits), overwrite: true);
+          if (mediaPath != null) {
+            mediaPath = await miruGetActualPath(mediaPath);
+          }
         } catch (e) {
           logger.warning('Failed to process playlist: ${watchData.url}', e);
           return DownloadStatus.failed;
@@ -212,8 +216,9 @@ class VideoDownloader extends DownloadInterface {
         final itemTitle = item.title;
         final offlineResource = _detail?.offlineResource ?? {};
         offlineResource[epTitle] ??= {};
-        offlineResource[epTitle]![itemTitle] = curPath;
-        if (_detail != null) {
+        offlineResource[epTitle]![itemTitle] = mediaPath ?? '';
+        logger.info('Downloaded: $epTitle - $itemTitle, path: $mediaPath');
+        if (_detail != null && mediaPath != null) {
           _detail!.offlineResource = offlineResource;
           await DatabaseService.updateMiruDetail(
               detailPackage!, detailUrl!, _detail!);
