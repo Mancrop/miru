@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:miru_app/utils/i18n.dart';
 
 /// Shows a material design alert dialog with Cancel and Continue buttons.
 /// Returns true if the user presses Continue and the callback executes successfully.
@@ -24,9 +25,9 @@ Future<bool> showCustomAlertDialog({
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Cancel',
+              'common.cancel'.i18n,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -41,7 +42,7 @@ Future<bool> showCustomAlertDialog({
                 Navigator.of(context).pop(false);
               }
             },
-            child: const Text('Continue'),
+            child: Text('common.continue'.i18n),
           ),
         ],
       );

@@ -10,6 +10,7 @@ import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/database_service.dart';
 import 'package:miru_app/data/services/download/download_manager.dart';
 import 'package:miru_app/router/router.dart';
+import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/path_utils.dart';
 import 'package:miru_app/utils/request.dart';
@@ -91,6 +92,13 @@ class _SettingsPageState extends State<SettingsPage> {
         subTitle: 'settings.general-subtitle'.i18n,
         content: Column(
           children: [
+            if (Platform.isAndroid) ...[
+              SettingsTile(
+                title: 'settings.file-access-permission'.i18n,
+                onTap: () => openFullStorageSettings(),
+                trailing: const Icon(Icons.chevron_right),
+              )
+            ],
             // TMDB KEY 设置
             SettingsIntpuTile(
               title: 'settings.tmdb-key'.i18n,

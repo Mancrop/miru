@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:get/get.dart';
 import 'package:miru_app/utils/log.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<int> getAndroidVersion() async {
@@ -12,6 +15,28 @@ Future<int> getAndroidVersion() async {
     return sdkInt;
   }
   return 0;
+}
+
+Future<void> openFullStorageSettings() async {
+  assert(GetPlatform.isMobile);
+  if (Platform.isAndroid) {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final AndroidIntent intent = AndroidIntent(
+      action: 'android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION',
+      data: 'package:${packageInfo.packageName}',
+    );
+    
+    try {
+      await intent.launch();
+    } catch (e) {
+      logger.warning('Failed to open storage settings directly: $e');
+      // 如果直接导航失败，退回到常规设置页面
+      await openAppSettings();
+    }
+  } else {
+    // iOS 只能打开应用设置页面
+    await openAppSettings();
+  }
 }
 
 Future<bool> requestFullStoragePermissions() async {

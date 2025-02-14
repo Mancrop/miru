@@ -17,11 +17,9 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:miru_app/data/providers/anilist_provider.dart';
 import 'package:miru_app/data/providers/bt_server_provider.dart';
 import 'package:miru_app/models/index.dart';
-import 'package:miru_app/utils/android_permission.dart';
 import 'package:miru_app/utils/log.dart';
 import 'package:miru_app/utils/request.dart';
 import 'package:miru_app/utils/router.dart';
-import 'package:miru_app/views/dialogs/alert_dialog.dart';
 import 'package:miru_app/views/dialogs/bt_dialog.dart';
 import 'package:miru_app/controllers/home_controller.dart';
 import 'package:miru_app/controllers/main_controller.dart';
@@ -452,17 +450,6 @@ class VideoPlayerController extends GetxController {
 
         playTorrentFile(torrentMediaFileList.first);
       } else if (watchData!.type == ExtensionWatchBangumiType.local) {
-        // 此时需要请求权限
-        if (!await isFullStoragePermissionGranted()) {
-          showCustomAlertDialog(
-              context: currentContext,
-              message:
-                  'You should allow miru to access all the file to play video',
-              callback: () async {
-                final success = await requestFullStoragePermissions();
-                return success;
-              });
-        }
         // 目前没有考虑到音轨与视频轨分离的情况
         await player.open(
           Media(watchData!.url),
