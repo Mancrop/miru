@@ -12,6 +12,8 @@ jobs:
   generate-changelog:
     # needs: ["build-and-release-android", "build-and-release-windows"]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
