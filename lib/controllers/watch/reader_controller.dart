@@ -40,6 +40,7 @@ class ReaderController<T> extends GetxController {
   final useOfflineData = false.obs;
   final error = ''.obs;
   final isShowControlPanel = false.obs;
+  final shouldRenderControPanel = false.obs;
   late final index = playIndex.obs;
   get cuurentPlayUrl => playList[index.value].url;
   Timer? _timer;
@@ -80,6 +81,7 @@ class ReaderController<T> extends GetxController {
 
   showControlPanel() {
     isShowControlPanel.value = true;
+    shouldRenderControPanel.value = true;
     _timer?.cancel();
     _timer = Timer(const Duration(seconds: 3), () {
       isShowControlPanel.value = false;
