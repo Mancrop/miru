@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_windows_webview/flutter_windows_webview.dart';
 import 'package:get/get.dart';
+import 'package:miru_app/animations/navigation_animation.dart';
 import 'package:miru_app/data/providers/tmdb_provider.dart';
 import 'package:miru_app/data/services/offline_resource_service.dart';
 import 'package:miru_app/models/index.dart';
@@ -475,36 +476,53 @@ class DetailPageController extends GetxController {
       }
     }
 
-    Navigator.of(context, rootNavigator: true).push(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: ((context, animation, secondaryAnimation) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.ease,
+    if (Platform.isAndroid) {
+      NavigationAnimation.roundedGetTo(
+          page: WatchPage(
+            cover: detail!.cover,
+            playList: urls,
+            package: package,
+            playerIndex: index,
+            title: detail!.title,
+            episodeGroupId: selectEpGroup,
+            detailUrl: url,
+            anilistID: aniListID.value,
+            detail: _miruDetail!,
+            extensionDetail: detail!,
+          ),
+          transition: Transition.downToUp);
+    } else {
+      Navigator.of(context, rootNavigator: true).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 600),
+          pageBuilder: ((context, animation, secondaryAnimation) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.ease,
+                ),
               ),
-            ),
-            child: WatchPage(
-              cover: detail!.cover,
-              playList: urls,
-              package: package,
-              playerIndex: index,
-              title: detail!.title,
-              episodeGroupId: selectEpGroup,
-              detailUrl: url,
-              anilistID: aniListID.value,
-              detail: _miruDetail!,
-              extensionDetail: detail!,
-            ),
-          );
-        }),
-      ),
-    );
+              child: WatchPage(
+                cover: detail!.cover,
+                playList: urls,
+                package: package,
+                playerIndex: index,
+                title: detail!.title,
+                episodeGroupId: selectEpGroup,
+                detailUrl: url,
+                anilistID: aniListID.value,
+                detail: _miruDetail!,
+                extensionDetail: detail!,
+              ),
+            );
+          }),
+        ),
+      );
+    }
   }
 
   changeDownloadSelectorState() {
