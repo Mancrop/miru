@@ -427,7 +427,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 10),
             SettingsTile(
-              isCard: true,
+              isCard: false,
               icon: Container(
                 width: 30,
                 height: 30,
@@ -527,7 +527,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 8),
             SettingsTile(
-                isCard: true,
+                isCard: false,
                 title: 'settings.download-manager'.i18n,
                 icon: !Platform.isAndroid
                     ? Icon(fluent.FluentIcons.hard_drive, size: 36)
