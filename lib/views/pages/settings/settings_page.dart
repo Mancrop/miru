@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
+import 'package:miru_app/animations/navigation_animation.dart';
 import 'package:miru_app/data/providers/tmdb_provider.dart';
 import 'package:miru_app/controllers/application_controller.dart';
 import 'package:miru_app/data/services/database_service.dart';
@@ -443,7 +444,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 if (!Platform.isAndroid) {
                   router.push('/settings/anilist');
                 } else {
-                  Get.to(() => const AniListTrackingPage());
+                  NavigationAnimation.roundedGetTo(
+                    page: const AniListTrackingPage(),
+                    transition: Transition.rightToLeft,
+                  );
+                  // Get.to(() => const AniListTrackingPage());
                 }
               },
             ),
@@ -532,7 +537,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (!Platform.isAndroid) {
                     router.push('/settings/download/download_manager');
                   } else {
-                    Get.to(() => const DownloadManagerPage());
+                    NavigationAnimation.roundedGetTo(
+                        page: DownloadManagerPage(),
+                        transition: Transition.rightToLeft);
                   }
                 }),
           ],
