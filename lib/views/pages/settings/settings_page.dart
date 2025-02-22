@@ -139,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: Text('common.settings'.i18n),
       ),
-      body: _buildAndroidContent(context),
+      body: SingleChildScrollView(child: _buildAndroidContent(context)),
     );
   }
 
