@@ -11,7 +11,7 @@ class SettingsTile extends StatefulWidget {
     this.buildSubtitle,
     this.onTap,
     this.isCard = false,
-    this.radius = const BorderRadius.all(Radius.circular(0)),
+    this.radius = const BorderRadius.all(Radius.circular(16.0)),
   });
   final Widget? icon;
   final String title;
@@ -31,18 +31,15 @@ class _SettingsTileState extends State<SettingsTile> {
       children: [
         if (widget.icon != null) ...[
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: IconTheme(
               data: IconThemeData(
                 color: Theme.of(context).colorScheme.primary,
-                size: 22,
+                size: 24,
               ),
               child: widget.icon!,
             ),
@@ -59,17 +56,19 @@ class _SettingsTileState extends State<SettingsTile> {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
               ),
               if (widget.buildSubtitle != null)
-                Text(
-                  widget.buildSubtitle!.call(),
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withAlpha(150)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    widget.buildSubtitle!.call(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -78,33 +77,17 @@ class _SettingsTileState extends State<SettingsTile> {
       ],
     );
 
-    if (widget.isCard) {
-      return TextButton(
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: widget.radius,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          backgroundColor:
-              Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-        ),
-        onPressed: widget.onTap,
-        child: content,
-      );
-    }
-
+    // 不再使用原来的卡片样式，直接返回带有内边距的按钮
     return TextButton(
       style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: widget.radius,
         ),
+        alignment: Alignment.centerLeft,
       ),
       onPressed: widget.onTap,
       child: content,
@@ -126,7 +109,7 @@ class _SettingsTileState extends State<SettingsTile> {
             if (widget.buildSubtitle != null)
               Text(
                 widget.buildSubtitle!.call(),
-                style: const TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 14),
               )
           ],
         ),

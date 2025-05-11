@@ -11,13 +11,13 @@ class SettingsIntpuTile extends fluent.StatefulWidget {
     required this.title,
     required this.onChanged,
     required this.buildText,
-    required this.buildSubtitle,
+    this.buildSubtitle,
     this.trailing = const Icon(Icons.chevron_right),
     this.isCard = false,
   });
   final Widget? icon;
   final String title;
-  final String Function() buildSubtitle;
+  final String Function()? buildSubtitle;
   final String Function() buildText;
   final Widget trailing;
   final Function(String) onChanged;
@@ -43,10 +43,10 @@ class _SettingsIntpuTileState extends fluent.State<SettingsIntpuTile> {
   }
 
   Widget _buildAndroid(BuildContext context) {
-    return ListTile(
-      leading: widget.icon,
-      title: Text(widget.title),
-      subtitle: Text(widget.buildSubtitle()),
+    return SettingsTile(
+      icon: widget.icon,
+      title: widget.title,
+      buildSubtitle: widget.buildSubtitle,
       trailing: widget.trailing,
       onTap: () {
         showDialog(

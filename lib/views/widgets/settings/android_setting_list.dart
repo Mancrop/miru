@@ -6,11 +6,13 @@ class AndroidSettingList extends StatefulWidget {
     required this.icon,
     required this.mainTitle,
     required this.children,
+    this.isExpanded = true,
   });
 
   final Widget icon;
   final String mainTitle;
   final List<Widget> children;
+  final bool isExpanded;
 
   @override
   State<AndroidSettingList> createState() => _AndroidSettingListState();
@@ -19,7 +21,7 @@ class AndroidSettingList extends StatefulWidget {
 class _AndroidSettingListState extends State<AndroidSettingList>
     with SingleTickerProviderStateMixin {
   // Default to expanded for Updates section to match screenshot
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   late AnimationController _controller;
   late Animation<double> _iconTurns;
   late Animation<double> _fadeAnimation;
@@ -27,7 +29,7 @@ class _AndroidSettingListState extends State<AndroidSettingList>
   
   // Animation curve: starts with initial velocity, accelerates in the middle, slows down rapidly at the end
   static final Animatable<double> _customTween = 
-      CurveTween(curve: Curves.easeInOut);
+      CurveTween(curve: Curves.easeOutCubic);
   static final Animatable<double> _halfTween =
       Tween<double>(begin: 0.0, end: 0.5);
   static final Animatable<Offset> _slideTween =
@@ -35,8 +37,7 @@ class _AndroidSettingListState extends State<AndroidSettingList>
   @override
   void initState() {
     super.initState();
-    // Open the Updates section by default to match screenshot
-    _isExpanded = widget.mainTitle == "Updates" || widget.mainTitle == "Display";
+    _isExpanded = widget.isExpanded;
     
     _controller = AnimationController(
       duration: const Duration(milliseconds: 200),
@@ -75,7 +76,10 @@ class _AndroidSettingListState extends State<AndroidSettingList>
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
       ),
       onPressed: _toggleExpansion,
       child: Row(
@@ -83,7 +87,7 @@ class _AndroidSettingListState extends State<AndroidSettingList>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: IconTheme(
@@ -148,12 +152,20 @@ class _AndroidSettingListState extends State<AndroidSettingList>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Card(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 0), // Spacing between sections
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12.0), // Rounded corners for the entire section card
+    ),
+    clipBehavior: Clip.antiAlias, // Ensures content respects the rounded corners
+    elevation: 1.0, // Optional: adds a subtle shadow
+    child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildHeader(),
         _buildContent(),
       ],
-    );
+    ),
+  );
   }
 }

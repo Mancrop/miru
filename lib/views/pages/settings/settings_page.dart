@@ -6,11 +6,9 @@ import 'package:get/get.dart';
 import 'package:miru_app/controllers/settings_controller.dart';
 import 'package:miru_app/views/pages/settings/about_settings/check_update_tile.dart';
 import 'package:miru_app/views/pages/settings/about_settings/show_info_tile.dart';
-import 'package:miru_app/views/pages/settings/about_settings/update_setting_list.dart';
 import 'package:miru_app/views/pages/settings/advanced_settings/debug_setting.dart';
 import 'package:miru_app/views/pages/settings/advanced_settings/network_setting.dart';
 import 'package:miru_app/views/pages/settings/basic_settings/comic_reader_setting.dart';
-import 'package:miru_app/views/pages/settings/basic_settings/display_setting_list.dart';
 import 'package:miru_app/views/pages/settings/basic_settings/download_setting.dart';
 import 'package:miru_app/views/pages/settings/basic_settings/extensions_setting.dart';
 import 'package:miru_app/views/pages/settings/basic_settings/general_setting.dart';
@@ -105,9 +103,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
   Widget _buildAndroidContent(BuildContext context) {
     return Column(children: [
-      const UpdateSettingList(),
-      const SizedBox(height: 20),
-      const DisplaySettingList(),
       const SizedBox(height: 20),
       AndroidSettingList(
           icon: const Icon(Icons.settings),
@@ -120,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const TrackingSettingPage(),
             const DownloadSettingPage(),
           ]),
-      const SizedBox(height: 20),
+      const SizedBox(height: 10),
       AndroidSettingList(
           icon: const Icon(Icons.code),
           mainTitle: 'Advanced',
@@ -128,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const NetworkSettingPage(),
             const DebugSettingPage(),
           ]),
-      const SizedBox(height: 20),
+      const SizedBox(height: 10),
       AndroidSettingList(
           icon: const Icon(Icons.info),
           mainTitle: 'About',
@@ -140,13 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.settings, size: 24),
-            const SizedBox(width: 8),
-            Text('common.settings'.i18n),
-          ],
-        ),
+        title: Text('common.settings'.i18n),
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
