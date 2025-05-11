@@ -25,16 +25,23 @@ class SettingsTile extends StatefulWidget {
   State<SettingsTile> createState() => _SettingsTileState();
 }
 
-class _SettingsTileState extends State<SettingsTile> {
-  Widget _buildAndroid(BuildContext context) {
+class _SettingsTileState extends State<SettingsTile> {  Widget _buildAndroid(BuildContext context) {
     final content = Row(
       children: [
         if (widget.icon != null) ...[
-          IconTheme(
-            data: IconThemeData(
-              color: Theme.of(context).colorScheme.onSurface,
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+              shape: BoxShape.circle,
             ),
-            child: widget.icon!,
+            child: IconTheme(
+              data: IconThemeData(
+                color: Theme.of(context).colorScheme.primary,
+                size: 22,
+              ),
+              child: widget.icon!,
+            ),
           ),
           const SizedBox(width: 16),
         ],
@@ -45,8 +52,10 @@ class _SettingsTileState extends State<SettingsTile> {
             children: [
               Text(
                 widget.title,
-                style:
-                    TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               if (widget.buildSubtitle != null)
                 Text(
