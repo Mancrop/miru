@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/views/widgets/watch/playlist.dart';
 import 'package:miru_app/controllers/watch/reader_controller.dart';
@@ -71,7 +70,7 @@ class _ControlPanelHeaderState<T extends ReaderController>
           ],
         ),
       ),
-    ).animate().fade();
+    );
   }
 
   Widget _buildDesktop(BuildContext context) {
@@ -140,7 +139,7 @@ class _ControlPanelHeaderState<T extends ReaderController>
             ],
           ),
         ),
-      ).animate().fade(),
+      ),
     );
   }
 

@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/controllers/watch/reader_controller.dart';
-import 'package:miru_app/utils/i18n.dart';
 import 'package:miru_app/views/widgets/button.dart';
 
 class ControlPanelFooter<T extends ReaderController> extends StatelessWidget {
@@ -14,40 +10,49 @@ class ControlPanelFooter<T extends ReaderController> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<T>(tag: tag);
+    double screenWidth = MediaQuery.of(context).size.width;
+    double space = screenWidth / 300;
     return Container(
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Platform.isAndroid
-            ? Theme.of(context).colorScheme.surface.withOpacity(0.9)
-            : Colors.transparent,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(40),
-          topRight: Radius.circular(40),
-        ),
+        color: Theme.of(context).colorScheme.surfaceContainer.withAlpha(255),
       ),
       clipBehavior: Clip.antiAlias,
       child: Obx(
         () => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (c.index.value > 0)
-              PlatformFilledButton(
-                child: Text('common.previous'.i18n),
-                onPressed: () {
-                  c.index.value--;
-                },
-              ),
-            const Spacer(),
-            if (c.index.value != c.playList.length - 1)
-              PlatformFilledButton(
-                child: Text('common.next'.i18n),
-                onPressed: () {
-                  c.index.value++;
-                },
-              ),
+            Row(
+              children: [
+                PlatformIconButton(
+                  icon: Icon(Icons.arrow_back, size: 23),
+                  onPressed: c.index.value > 0
+                      ? () {
+                          c.index.value--;
+                        }
+                      : null,
+                ),
+                SizedBox(width: space),
+                PlatformIconButton(
+                  icon: Icon(Icons.menu, size: 23),
+                ),
+                SizedBox(width: space),
+                PlatformIconButton(icon: Icon(Icons.settings, size: 23)),
+                SizedBox(width: space),
+              ],
+            ),
+            PlatformIconButton(
+              icon: Icon(Icons.arrow_forward, size: 23),
+              onPressed: c.index.value != c.playList.length - 1
+                  ? () {
+                      c.index.value++;
+                    }
+                  : null,
+            ),
           ],
         ),
       ),
-    ).animate().fade();
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:miru_app/utils/layout.dart';
@@ -53,27 +55,49 @@ class ReaderView<T extends ReaderController> extends StatelessWidget {
                   if (xPos > unitWidth * 2) {
                     return c.nextPage();
                   }
-                  c.isShowControlPanel.value = !c.isShowControlPanel.value;
+                  // c.isShowControlPanel.value = !c.isShowControlPanel.value;
+                  if (!c.isShowControlPanel.value) {
+                    c.showControlPanel();
+                  } else {
+                    c.isShowControlPanel.value = false;
+                  }
                 },
               ),
             ),
 
-          if (c.isShowControlPanel.value) ...[
-            // 顶部控制
-            Positioned(
-              child: ControlPanelHeader<T>(
-                tag,
-                buildSettings: buildSettings,
-              ),
+          // 顶部控制
+          Positioned(
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 200),
+              opacity: c.isShowControlPanel.value ? 1 : 0,
+              onEnd: () {
+                if (!c.isShowControlPanel.value) {
+                  c.shouldRenderControPanel.value = false;
+                }
+              },
+              child: c.shouldRenderControPanel.value
+                  ? ControlPanelHeader<T>(tag, buildSettings: buildSettings)
+                  : SizedBox.shrink(),
             ),
-            // 底部控制
-            Positioned(
-              right: 0,
-              left: 0,
-              bottom: 0,
-              child: ControlPanelFooter<T>(tag),
+          ),
+          // 底部控制
+          Positioned(
+            right: 0,
+            left: 0,
+            bottom: 0,
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 200),
+              opacity: c.isShowControlPanel.value ? 1 : 0,
+              onEnd: () {
+                if (!c.isShowControlPanel.value) {
+                  c.shouldRenderControPanel.value = false;
+                }
+              },
+              child: c.shouldRenderControPanel.value
+                  ? ControlPanelFooter<T>(tag)
+                  : SizedBox.shrink(),
             ),
-          ]
+          ),
         ],
       ),
     );
